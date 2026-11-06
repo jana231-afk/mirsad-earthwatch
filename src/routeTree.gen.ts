@@ -10,33 +10,226 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConsoleRouteImport } from './routes/_console'
+import { Route as ConsoleDashboardRouteImport } from './routes/_console.dashboard'
+import { Route as ConsoleHistoryRouteImport } from './routes/_console.history'
+import { Route as ConsoleUploadRouteImport } from './routes/_console.upload'
+import { Route as ConsoleUsersRouteImport } from './routes/_console.users'
+import { Route as ConsoleFieldIndexRouteImport } from './routes/_console.field.index'
+import { Route as ConsoleFieldIdRouteImport } from './routes/_console.field.$id'
+import { Route as ConsoleIncidentsIndexRouteImport } from './routes/_console.incidents.index'
+import { Route as ConsoleIncidentsIdRouteImport } from './routes/_console.incidents.$id'
+import { Route as ConsoleIncidentsNewRouteImport } from './routes/_console.incidents.new'
+import { Route as ConsoleReportsIndexRouteImport } from './routes/_console.reports.index'
+import { Route as ConsoleReportsRunIdRouteImport } from './routes/_console.reports.$runId'
+import { Route as ConsoleResultsRunIdRouteImport } from './routes/_console.results.$runId'
+import { Route as ConsoleReviewRunIdRouteImport } from './routes/_console.review.$runId'
+import { Route as ConsoleIncidentsIdAnalyzeRouteImport } from './routes/_console.incidents.$id_.analyze'
+import { Route as ConsoleIncidentsIdEditRouteImport } from './routes/_console.incidents.$id_.edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConsoleRoute = ConsoleRouteImport.update({
+  id: '/_console',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsoleDashboardRoute = ConsoleDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleHistoryRoute = ConsoleHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleUploadRoute = ConsoleUploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleUsersRoute = ConsoleUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleFieldIndexRoute = ConsoleFieldIndexRouteImport.update({
+  id: '/field/',
+  path: '/field/',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleFieldIdRoute = ConsoleFieldIdRouteImport.update({
+  id: '/field/$id',
+  path: '/field/$id',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleIncidentsIndexRoute = ConsoleIncidentsIndexRouteImport.update({
+  id: '/incidents/',
+  path: '/incidents/',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleIncidentsIdRoute = ConsoleIncidentsIdRouteImport.update({
+  id: '/incidents/$id',
+  path: '/incidents/$id',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleIncidentsNewRoute = ConsoleIncidentsNewRouteImport.update({
+  id: '/incidents/new',
+  path: '/incidents/new',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleReportsIndexRoute = ConsoleReportsIndexRouteImport.update({
+  id: '/reports/',
+  path: '/reports/',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleReportsRunIdRoute = ConsoleReportsRunIdRouteImport.update({
+  id: '/reports/$runId',
+  path: '/reports/$runId',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleResultsRunIdRoute = ConsoleResultsRunIdRouteImport.update({
+  id: '/results/$runId',
+  path: '/results/$runId',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleReviewRunIdRoute = ConsoleReviewRunIdRouteImport.update({
+  id: '/review/$runId',
+  path: '/review/$runId',
+  getParentRoute: () => ConsoleRoute,
+} as any)
+const ConsoleIncidentsIdAnalyzeRoute =
+  ConsoleIncidentsIdAnalyzeRouteImport.update({
+    id: '/incidents/$id_/analyze',
+    path: '/incidents/$id/analyze',
+    getParentRoute: () => ConsoleRoute,
+  } as any)
+const ConsoleIncidentsIdEditRoute = ConsoleIncidentsIdEditRouteImport.update({
+  id: '/incidents/$id_/edit',
+  path: '/incidents/$id/edit',
+  getParentRoute: () => ConsoleRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof ConsoleDashboardRoute
+  '/history': typeof ConsoleHistoryRoute
+  '/upload': typeof ConsoleUploadRoute
+  '/users': typeof ConsoleUsersRoute
+  '/field/$id': typeof ConsoleFieldIdRoute
+  '/incidents/$id': typeof ConsoleIncidentsIdRoute
+  '/incidents/new': typeof ConsoleIncidentsNewRoute
+  '/reports/$runId': typeof ConsoleReportsRunIdRoute
+  '/results/$runId': typeof ConsoleResultsRunIdRoute
+  '/review/$runId': typeof ConsoleReviewRunIdRoute
+  '/field/': typeof ConsoleFieldIndexRoute
+  '/incidents/': typeof ConsoleIncidentsIndexRoute
+  '/reports/': typeof ConsoleReportsIndexRoute
+  '/incidents/$id/analyze': typeof ConsoleIncidentsIdAnalyzeRoute
+  '/incidents/$id/edit': typeof ConsoleIncidentsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof ConsoleDashboardRoute
+  '/history': typeof ConsoleHistoryRoute
+  '/upload': typeof ConsoleUploadRoute
+  '/users': typeof ConsoleUsersRoute
+  '/field/$id': typeof ConsoleFieldIdRoute
+  '/incidents/$id': typeof ConsoleIncidentsIdRoute
+  '/incidents/new': typeof ConsoleIncidentsNewRoute
+  '/reports/$runId': typeof ConsoleReportsRunIdRoute
+  '/results/$runId': typeof ConsoleResultsRunIdRoute
+  '/review/$runId': typeof ConsoleReviewRunIdRoute
+  '/field': typeof ConsoleFieldIndexRoute
+  '/incidents': typeof ConsoleIncidentsIndexRoute
+  '/reports': typeof ConsoleReportsIndexRoute
+  '/incidents/$id/analyze': typeof ConsoleIncidentsIdAnalyzeRoute
+  '/incidents/$id/edit': typeof ConsoleIncidentsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_console': typeof ConsoleRouteWithChildren
+  '/_console/dashboard': typeof ConsoleDashboardRoute
+  '/_console/history': typeof ConsoleHistoryRoute
+  '/_console/upload': typeof ConsoleUploadRoute
+  '/_console/users': typeof ConsoleUsersRoute
+  '/_console/field/$id': typeof ConsoleFieldIdRoute
+  '/_console/incidents/$id': typeof ConsoleIncidentsIdRoute
+  '/_console/incidents/new': typeof ConsoleIncidentsNewRoute
+  '/_console/reports/$runId': typeof ConsoleReportsRunIdRoute
+  '/_console/results/$runId': typeof ConsoleResultsRunIdRoute
+  '/_console/review/$runId': typeof ConsoleReviewRunIdRoute
+  '/_console/field/': typeof ConsoleFieldIndexRoute
+  '/_console/incidents/': typeof ConsoleIncidentsIndexRoute
+  '/_console/reports/': typeof ConsoleReportsIndexRoute
+  '/_console/incidents/$id_/analyze': typeof ConsoleIncidentsIdAnalyzeRoute
+  '/_console/incidents/$id_/edit': typeof ConsoleIncidentsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/history'
+    | '/upload'
+    | '/users'
+    | '/field/$id'
+    | '/incidents/$id'
+    | '/incidents/new'
+    | '/reports/$runId'
+    | '/results/$runId'
+    | '/review/$runId'
+    | '/field/'
+    | '/incidents/'
+    | '/reports/'
+    | '/incidents/$id/analyze'
+    | '/incidents/$id/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/history'
+    | '/upload'
+    | '/users'
+    | '/field/$id'
+    | '/incidents/$id'
+    | '/incidents/new'
+    | '/reports/$runId'
+    | '/results/$runId'
+    | '/review/$runId'
+    | '/field'
+    | '/incidents'
+    | '/reports'
+    | '/incidents/$id/analyze'
+    | '/incidents/$id/edit'
+  id:
+    | '__root__'
+    | '/'
+    | '/_console'
+    | '/_console/dashboard'
+    | '/_console/history'
+    | '/_console/upload'
+    | '/_console/users'
+    | '/_console/field/$id'
+    | '/_console/incidents/$id'
+    | '/_console/incidents/new'
+    | '/_console/reports/$runId'
+    | '/_console/results/$runId'
+    | '/_console/review/$runId'
+    | '/_console/field/'
+    | '/_console/incidents/'
+    | '/_console/reports/'
+    | '/_console/incidents/$id_/analyze'
+    | '/_console/incidents/$id_/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConsoleRoute: typeof ConsoleRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +241,163 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_console': {
+      id: '/_console'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ConsoleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_console/dashboard': {
+      id: '/_console/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof ConsoleDashboardRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/history': {
+      id: '/_console/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof ConsoleHistoryRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/upload': {
+      id: '/_console/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof ConsoleUploadRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/users': {
+      id: '/_console/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof ConsoleUsersRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/field/': {
+      id: '/_console/field/'
+      path: '/field'
+      fullPath: '/field/'
+      preLoaderRoute: typeof ConsoleFieldIndexRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/field/$id': {
+      id: '/_console/field/$id'
+      path: '/field/$id'
+      fullPath: '/field/$id'
+      preLoaderRoute: typeof ConsoleFieldIdRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/incidents/': {
+      id: '/_console/incidents/'
+      path: '/incidents'
+      fullPath: '/incidents/'
+      preLoaderRoute: typeof ConsoleIncidentsIndexRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/incidents/$id': {
+      id: '/_console/incidents/$id'
+      path: '/incidents/$id'
+      fullPath: '/incidents/$id'
+      preLoaderRoute: typeof ConsoleIncidentsIdRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/incidents/new': {
+      id: '/_console/incidents/new'
+      path: '/incidents/new'
+      fullPath: '/incidents/new'
+      preLoaderRoute: typeof ConsoleIncidentsNewRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/reports/': {
+      id: '/_console/reports/'
+      path: '/reports'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof ConsoleReportsIndexRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/reports/$runId': {
+      id: '/_console/reports/$runId'
+      path: '/reports/$runId'
+      fullPath: '/reports/$runId'
+      preLoaderRoute: typeof ConsoleReportsRunIdRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/results/$runId': {
+      id: '/_console/results/$runId'
+      path: '/results/$runId'
+      fullPath: '/results/$runId'
+      preLoaderRoute: typeof ConsoleResultsRunIdRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/review/$runId': {
+      id: '/_console/review/$runId'
+      path: '/review/$runId'
+      fullPath: '/review/$runId'
+      preLoaderRoute: typeof ConsoleReviewRunIdRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/incidents/$id_/analyze': {
+      id: '/_console/incidents/$id_/analyze'
+      path: '/incidents/$id/analyze'
+      fullPath: '/incidents/$id/analyze'
+      preLoaderRoute: typeof ConsoleIncidentsIdAnalyzeRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
+    '/_console/incidents/$id_/edit': {
+      id: '/_console/incidents/$id_/edit'
+      path: '/incidents/$id/edit'
+      fullPath: '/incidents/$id/edit'
+      preLoaderRoute: typeof ConsoleIncidentsIdEditRouteImport
+      parentRoute: typeof ConsoleRoute
+    }
   }
 }
 
+interface ConsoleRouteChildren {
+  ConsoleDashboardRoute: typeof ConsoleDashboardRoute
+  ConsoleHistoryRoute: typeof ConsoleHistoryRoute
+  ConsoleUploadRoute: typeof ConsoleUploadRoute
+  ConsoleUsersRoute: typeof ConsoleUsersRoute
+  ConsoleFieldIdRoute: typeof ConsoleFieldIdRoute
+  ConsoleIncidentsIdRoute: typeof ConsoleIncidentsIdRoute
+  ConsoleIncidentsNewRoute: typeof ConsoleIncidentsNewRoute
+  ConsoleReportsRunIdRoute: typeof ConsoleReportsRunIdRoute
+  ConsoleResultsRunIdRoute: typeof ConsoleResultsRunIdRoute
+  ConsoleReviewRunIdRoute: typeof ConsoleReviewRunIdRoute
+  ConsoleFieldIndexRoute: typeof ConsoleFieldIndexRoute
+  ConsoleIncidentsIndexRoute: typeof ConsoleIncidentsIndexRoute
+  ConsoleReportsIndexRoute: typeof ConsoleReportsIndexRoute
+  ConsoleIncidentsIdAnalyzeRoute: typeof ConsoleIncidentsIdAnalyzeRoute
+  ConsoleIncidentsIdEditRoute: typeof ConsoleIncidentsIdEditRoute
+}
+
+const ConsoleRouteChildren: ConsoleRouteChildren = {
+  ConsoleDashboardRoute: ConsoleDashboardRoute,
+  ConsoleHistoryRoute: ConsoleHistoryRoute,
+  ConsoleUploadRoute: ConsoleUploadRoute,
+  ConsoleUsersRoute: ConsoleUsersRoute,
+  ConsoleFieldIdRoute: ConsoleFieldIdRoute,
+  ConsoleIncidentsIdRoute: ConsoleIncidentsIdRoute,
+  ConsoleIncidentsNewRoute: ConsoleIncidentsNewRoute,
+  ConsoleReportsRunIdRoute: ConsoleReportsRunIdRoute,
+  ConsoleResultsRunIdRoute: ConsoleResultsRunIdRoute,
+  ConsoleReviewRunIdRoute: ConsoleReviewRunIdRoute,
+  ConsoleFieldIndexRoute: ConsoleFieldIndexRoute,
+  ConsoleIncidentsIndexRoute: ConsoleIncidentsIndexRoute,
+  ConsoleReportsIndexRoute: ConsoleReportsIndexRoute,
+  ConsoleIncidentsIdAnalyzeRoute: ConsoleIncidentsIdAnalyzeRoute,
+  ConsoleIncidentsIdEditRoute: ConsoleIncidentsIdEditRoute,
+}
+
+const ConsoleRouteWithChildren =
+  ConsoleRoute._addFileChildren(ConsoleRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConsoleRoute: ConsoleRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
