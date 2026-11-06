@@ -66,10 +66,10 @@ export interface AnalysisRun {
   validKm2: number;
   nodataKm2: number;
   runBy: string;
-  reviewer?: string;
-  reviewedAt?: string;
-  reviewNotes?: string;
-  layers: { base: string; mask: string; nodata?: string; pre?: string };
+  reviewer?: string | undefined;
+  reviewedAt?: string | undefined;
+  reviewNotes?: string | undefined;
+  layers: { base: string; mask: string; nodata?: string | undefined; pre?: string | undefined };
 }
 
 export interface User {

@@ -12,8 +12,8 @@ import { demoActions, useDemo } from "@/lib/demo-store";
 import { SENSORS, type ImageRole } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_console/upload")({
-  validateSearch: (s: Record<string, unknown>): { incident?: string } => ({
-    incident: typeof s.incident === "string" ? s.incident : undefined,
+  validateSearch: (s: Record<string, unknown>): { incident?: string | undefined } => ({
+    incident: typeof s['incident'] === "string" ? s['incident'] : undefined,
   }),
   head: () => ({
     meta: [

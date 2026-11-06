@@ -39,16 +39,16 @@ export function IncidentForm({
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const err: Record<string, string> = {};
-    if (!v.name.trim()) err.name = "اسم الحادثة مطلوب";
-    if (!v.location.trim()) err.location = "الموقع مطلوب";
-    if (!v.date) err.date = "تاريخ الحادثة مطلوب";
+    if (!v.name.trim()) err['name'] = "اسم الحادثة مطلوب";
+    if (!v.location.trim()) err['location'] = "الموقع مطلوب";
+    if (!v.date) err['date'] = "تاريخ الحادثة مطلوب";
     setErrors(err);
     if (Object.keys(err).length === 0) onSubmit(v);
   };
 
   return (
     <form onSubmit={submit} noValidate className="space-y-5">
-      <Field label="اسم الحادثة" en="Incident name" error={errors.name}>
+      <Field label="اسم الحادثة" en="Incident name" error={errors['name']}>
         <input value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} placeholder="مثال: سيول وادي الأخضر" className="field" maxLength={120} />
       </Field>
 
@@ -79,10 +79,10 @@ export function IncidentForm({
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="الموقع" en="Location" error={errors.location}>
+        <Field label="الموقع" en="Location" error={errors['location']}>
           <input value={v.location} onChange={(e) => setV({ ...v, location: e.target.value })} placeholder="المدينة، المنطقة" className="field" maxLength={120} />
         </Field>
-        <Field label="تاريخ الحادثة" en="Incident date" error={errors.date}>
+        <Field label="تاريخ الحادثة" en="Incident date" error={errors['date']}>
           <input type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} className="field ltr" />
         </Field>
       </div>
@@ -136,7 +136,7 @@ export function IncidentForm({
   );
 }
 
-function Field({ label, en, error, children }: { label: string; en?: string; error?: string; children: React.ReactNode }) {
+function Field({ label, en, error, children }: { label: string; en?: string | undefined; error?: string | undefined; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <label className="block text-sm font-medium">

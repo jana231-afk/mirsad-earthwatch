@@ -4,17 +4,17 @@ import { cn } from "@/lib/utils";
 
 export interface MapViewerProps {
   base: string;
-  mask?: string;
-  nodata?: string;
+  mask?: string | undefined;
+  nodata?: string | undefined;
   kind: "flood" | "fire";
   /** Ground width of the scene in km (used for the scale bar). */
-  sceneWidthKm?: number;
-  className?: string;
-  showControls?: boolean;
-  showLegend?: boolean;
-  showLayerPanel?: boolean;
-  caption?: string;
-  defaultMaskVisible?: boolean;
+  sceneWidthKm?: number | undefined;
+  className?: string | undefined;
+  showControls?: boolean | undefined;
+  showLegend?: boolean | undefined;
+  showLayerPanel?: boolean | undefined;
+  caption?: string | undefined;
+  defaultMaskVisible?: boolean | undefined;
 }
 
 const MIN_Z = 1;
@@ -35,7 +35,7 @@ export function MaskLayer({ src, className, style }: { src: string; className: s
   );
 }
 
-export function MapLegend({ kind, hasNodata = true, className }: { kind: "flood" | "fire"; hasNodata?: boolean; className?: string }) {
+export function MapLegend({ kind, hasNodata = true, className }: { kind: "flood" | "fire"; hasNodata?: boolean | undefined; className?: string }) {
   return (
     <div className={cn("space-y-1.5 text-xs", className)}>
       <div className="flex items-center gap-2">
@@ -80,7 +80,7 @@ export function MapViewer({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const ro = new ResizeObserver(([e]) => setSize({ w: e.contentRect.width, h: e.contentRect.height }));
+    const ro = new ResizeObserver((entries) => { const e = entries[0]; if (e) setSize({ w: e.contentRect.width, h: e.contentRect.height }); });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -231,7 +231,7 @@ function LayerToggle({ label, checked, onChange }: { label: string; checked: boo
 }
 
 /** Binary mask preview (white = detected class, dark = background). */
-export function BinaryMask({ mask, nodata, className, label }: { mask: string; nodata?: string; className?: string; label?: string }) {
+export function BinaryMask({ mask, nodata, className, label }: { mask: string; nodata?: string | undefined; className?: string | undefined; label?: string }) {
   return (
     <div className={cn("relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-mask-bg", className)}>
       <MaskLayer src={mask} className="bg-mask-fg" />
@@ -243,7 +243,7 @@ export function BinaryMask({ mask, nodata, className, label }: { mask: string; n
   );
 }
 
-export function ImageThumb({ src, label, className }: { src: string; label?: string; className?: string }) {
+export function ImageThumb({ src, label, className }: { src: string; label?: string | undefined; className?: string }) {
   return (
     <div className={cn("relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-map", className)}>
       <img src={src} alt={label ?? "صورة القمر الصناعي"} className="h-full w-full object-cover" loading="lazy" />

@@ -2,7 +2,7 @@ import { InfoRow } from "./bits";
 import { formatKm2, type AnalysisRun, type SatImage } from "@/lib/demo-data";
 import { cn } from "@/lib/utils";
 
-export function AreaStats({ run, kind, className }: { run: AnalysisRun; kind: "flood" | "fire"; className?: string }) {
+export function AreaStats({ run, kind, className }: { run: AnalysisRun; kind: "flood" | "fire"; className?: string | undefined }) {
   const items = [
     { label: kind === "flood" ? "مساحة المياه المكتشفة" : "المساحة المحترقة المكتشفة", en: "Affected area", value: formatKm2(run.affectedKm2), unit: "km²", strong: true },
     { label: "نسبة المساحة المتأثرة", en: "Affected percentage", value: run.affectedPct.toFixed(2), unit: "%", strong: true },

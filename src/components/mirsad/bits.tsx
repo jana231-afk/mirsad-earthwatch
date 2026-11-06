@@ -22,10 +22,10 @@ export function PageHeader({
   crumbs,
 }: {
   title: string;
-  en?: string;
-  description?: ReactNode;
-  actions?: ReactNode;
-  crumbs?: { label: string; to?: string; params?: Record<string, string> }[];
+  en?: string | undefined;
+  description?: ReactNode | undefined;
+  actions?: ReactNode | undefined;
+  crumbs?: { label: string; to?: string | undefined; params?: Record<string, string> }[];
 }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -66,12 +66,12 @@ export function Panel({
   className,
   bodyClassName,
 }: {
-  title?: string;
-  en?: string;
-  actions?: ReactNode;
+  title?: string | undefined;
+  en?: string | undefined;
+  actions?: ReactNode | undefined;
   children: ReactNode;
-  className?: string;
-  bodyClassName?: string;
+  className?: string | undefined;
+  bodyClassName?: string | undefined;
 }) {
   return (
     <section className={cn("rounded-lg border bg-card shadow-card", className)}>
@@ -154,12 +154,12 @@ export function StatCard({
   hint,
 }: {
   label: string;
-  en?: string;
+  en?: string | undefined;
   value: ReactNode;
-  unit?: string;
-  icon?: ReactNode;
-  tone?: "primary" | "water" | "burn" | "navy" | "success";
-  hint?: string;
+  unit?: string | undefined;
+  icon?: ReactNode | undefined;
+  tone?: "primary" | "water" | "burn" | "navy" | "success" | undefined;
+  hint?: string | undefined;
 }) {
   const tones = {
     primary: "bg-primary-soft text-primary",
@@ -221,10 +221,10 @@ export function Notice({
   children,
   icon,
 }: {
-  tone?: "info" | "warning" | "danger" | "success";
-  title?: string;
+  tone?: "info" | "warning" | "danger" | "success" | undefined;
+  title?: string | undefined;
   children: ReactNode;
-  icon?: ReactNode;
+  icon?: ReactNode | undefined;
 }) {
   const tones = {
     info: "border-info/25 bg-info-soft text-info",

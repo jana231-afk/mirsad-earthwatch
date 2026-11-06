@@ -10,8 +10,8 @@ import { useDemo } from "@/lib/demo-store";
 import { RUN_STATUS_LABELS, TYPE_LABELS, formatKm2 } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_console/reports/$runId")({
-  validateSearch: (s: Record<string, unknown>): { download?: boolean } => ({
-    download: s.download === true || s.download === "true" ? true : undefined,
+  validateSearch: (s: Record<string, unknown>): { download?: boolean | undefined } => ({
+    download: s['download'] === true || s['download'] === "true" ? true : undefined,
   }),
   head: () => ({
     meta: [
@@ -41,6 +41,7 @@ function ReportPage() {
       const t = setTimeout(() => window.print(), 400);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, [download, reviewed]);
 
   if (!run || !inc) return <EmptyState title="التقرير غير موجود" />;
