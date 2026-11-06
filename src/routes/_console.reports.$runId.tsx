@@ -57,7 +57,7 @@ function ReportPage() {
     <>
       <div className="no-print mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">معاينة التقرير <span className="ltr ms-2 text-sm font-medium text-muted-foreground">PDF Report Preview</span></h1>
+          <h1 className="text-2xl font-bold">معاينة التقرير <span className="ltr mx-2 text-sm font-medium text-muted-foreground">PDF Report Preview</span></h1>
           <p className="text-sm text-muted-foreground">يُنشأ ملف PDF في النظام الفعلي بواسطة ReportLab على الخادم.</p>
         </div>
         <div className="flex gap-2">

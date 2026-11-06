@@ -85,7 +85,7 @@ function UploadPage() {
   const openIncidents = incidents.filter((i) => i.status === "open");
   const [incidentId, setIncidentId] = useState(search.incident ?? openIncidents[0]?.id ?? "");
   const [imageRole, setImageRole] = useState<ImageRole>("post-event");
-  const [sensor, setSensor] = useState(SENSORS[0]);
+  const [sensor, setSensor] = useState<string>(SENSORS[0] ?? "");
   const [date, setDate] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [drag, setDrag] = useState(false);
@@ -134,12 +134,12 @@ function UploadPage() {
       imageRole,
       acquisitionDate: date || "2026-11-03",
       acquisitionDateSource: date ? "manual" : "metadata",
-      crs: result.checks[1].value,
+      crs: result.checks[1]?.value ?? "—",
       width: 10980,
       height: 10980,
       bands: 4,
       resolution: "10 m",
-      nodata: result.checks[4].value,
+      nodata: result.checks[4]?.value ?? "—",
       status: result.warnings.length ? "warning" : "valid",
       warnings: result.warnings,
       uploadedAt: new Date().toISOString().slice(0, 10),

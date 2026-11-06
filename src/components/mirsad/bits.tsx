@@ -49,9 +49,9 @@ export function PageHeader({
         )}
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           {title}
-          {en && <span className="ltr ms-3 text-sm font-medium text-muted-foreground">{en}</span>}
+          {en && <span className="ltr mx-2 text-sm font-medium text-muted-foreground">{en}</span>}
         </h1>
-        {description && <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{description}</p>}
+        {description && <div className="mt-1 max-w-3xl text-sm text-muted-foreground">{description}</div>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>
@@ -79,7 +79,7 @@ export function Panel({
         <header className="flex items-center justify-between gap-3 border-b px-5 py-3.5">
           <h2 className="text-sm font-semibold text-foreground">
             {title}
-            {en && <span className="ltr ms-2 text-xs font-normal text-muted-foreground">{en}</span>}
+            {en && <span className="ltr mx-2 text-xs font-normal text-muted-foreground">{en}</span>}
           </h2>
           {actions}
         </header>

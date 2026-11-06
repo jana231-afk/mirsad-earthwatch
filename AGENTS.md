@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- MIRSAD is a front-end prototype: all records live in `src/lib/demo-data.ts` and a small in-browser store (`src/lib/demo-store.ts`); keep it backend-free unless asked, because the student team will implement the real backend in Flask/SQLite.
+- Signed-in screens live under the pathless `_console` layout (sidebar + top bar); role-limited pages wrap their content in `RoleGate`, so each role only sees its own screens.
+- The UI is Arabic RTL (`dir="rtl"` on `<html>`); wrap Latin IDs, file names, numbers and units in the `ltr` utility so they render in the right order.
