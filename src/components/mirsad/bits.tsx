@@ -1,12 +1,18 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Flame, Lock, Waves, FlaskConical, Database } from "lucide-react";
+import { Flame, Lock, Waves, FlaskConical, Database, CalendarRange, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
+  AUTO_STATUS_RULE,
+  INCIDENT_STATUS_LABELS,
+  ROLE_HOME,
   RUN_STATUS_LABELS,
   TYPE_LABELS,
+  formatRange,
+  incidentStatus,
+  type Incident,
   type IncidentStatus,
   type IncidentType,
   type Role,
@@ -14,15 +20,14 @@ import {
 } from "@/lib/demo-data";
 import { useDemo } from "@/lib/demo-store";
 
+/** Page title block. Arabic only — never add English subtitles. */
 export function PageHeader({
   title,
-  en,
   description,
   actions,
   crumbs,
 }: {
   title: string;
-  en?: string | undefined;
   description?: ReactNode | undefined;
   actions?: ReactNode | undefined;
   crumbs?: { label: string; to?: string | undefined; params?: Record<string, string> }[];
@@ -47,10 +52,7 @@ export function PageHeader({
             ))}
           </nav>
         )}
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          {title}
-          {en && <span className="ltr mx-2 text-sm font-medium text-muted-foreground">{en}</span>}
-        </h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
         {description && <div className="mt-1 max-w-3xl text-sm text-muted-foreground">{description}</div>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -60,14 +62,12 @@ export function PageHeader({
 
 export function Panel({
   title,
-  en,
   actions,
   children,
   className,
   bodyClassName,
 }: {
-  title?: string | undefined;
-  en?: string | undefined;
+  title?: ReactNode | undefined;
   actions?: ReactNode | undefined;
   children: ReactNode;
   className?: string | undefined;
@@ -77,10 +77,7 @@ export function Panel({
     <section className={cn("rounded-lg border bg-card shadow-card", className)}>
       {title && (
         <header className="flex items-center justify-between gap-3 border-b px-5 py-3.5">
-          <h2 className="text-sm font-semibold text-foreground">
-            {title}
-            {en && <span className="ltr mx-2 text-xs font-normal text-muted-foreground">{en}</span>}
-          </h2>
+          <h2 className="text-sm font-semibold text-foreground">{title}</h2>
           {actions}
         </header>
       )}
@@ -94,25 +91,51 @@ export function TypeBadge({ type }: { type: IncidentType }) {
   return (
     <Badge variant={type} className="gap-1 font-medium">
       <Icon className="h-3 w-3" />
-      {TYPE_LABELS[type].ar}
+      {TYPE_LABELS[type]}
     </Badge>
   );
 }
 
 export function IncidentStatusBadge({ status }: { status: IncidentStatus }) {
   return (
-    <Badge variant={status} className="font-medium">
-      {status === "open" ? "مفتوحة · Open" : "مغلقة · Closed"}
+    <Badge variant={status} className="gap-1.5 font-medium">
+      <span className={cn("h-1.5 w-1.5 rounded-full", status === "active" ? "bg-primary" : "bg-muted-foreground")} />
+      {INCIDENT_STATUS_LABELS[status]}
     </Badge>
   );
 }
 
+/** Status badge computed automatically from the incident's dates and images. */
+export function AutoStatusBadge({ incident }: { incident: Incident }) {
+  const { images } = useDemo();
+  return <IncidentStatusBadge status={incidentStatus(incident, images)} />;
+}
+
+/** Small note explaining the automatic active/closed rule. */
+export function AutoStatusNote({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex gap-2 rounded-md border border-info/20 bg-info-soft px-3 py-2 text-xs leading-relaxed text-foreground/80", className)}>
+      <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
+      <span>{AUTO_STATUS_RULE}</span>
+    </div>
+  );
+}
+
+/** "من – إلى" date range. */
+export function DateRange({ from, to, className }: { from: string; to: string; className?: string }) {
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap", className)}>
+      <CalendarRange className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      {formatRange(from, to)}
+    </span>
+  );
+}
+
 export function RunStatusBadge({ status }: { status: RunStatus }) {
-  const variant =
-    status === "failed" ? "correction" : status === "processing" ? "processing" : status;
+  const variant = status === "failed" ? "correction" : status;
   return (
     <Badge variant={variant} className="font-medium">
-      {RUN_STATUS_LABELS[status].ar}
+      {RUN_STATUS_LABELS[status]}
     </Badge>
   );
 }
@@ -121,7 +144,7 @@ export function ExperimentalBadge() {
   return (
     <Badge variant="experimental" className="gap-1 font-medium">
       <FlaskConical className="h-3 w-3" />
-      تجريبي · Experimental
+      تجريبي – قيد التحقق
     </Badge>
   );
 }
@@ -130,7 +153,7 @@ export function DemoTag({ className }: { className?: string }) {
   return (
     <Badge variant="demo" className={cn("gap-1", className)}>
       <Database className="h-3 w-3" />
-      بيانات تجريبية · Demo data
+      بيانات تجريبية
     </Badge>
   );
 }
@@ -146,7 +169,6 @@ export function InfoRow({ label, value, mono }: { label: string; value: ReactNod
 
 export function StatCard({
   label,
-  en,
   value,
   unit,
   icon,
@@ -154,7 +176,6 @@ export function StatCard({
   hint,
 }: {
   label: string;
-  en?: string | undefined;
   value: ReactNode;
   unit?: string | undefined;
   icon?: ReactNode | undefined;
@@ -171,15 +192,12 @@ export function StatCard({
   return (
     <div className="rounded-lg border bg-card p-5 shadow-card">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-sm font-medium text-muted-foreground">{label}</div>
-          {en && <div className="ltr text-[11px] text-muted-foreground/80">{en}</div>}
-        </div>
+        <div className="text-sm font-medium text-muted-foreground">{label}</div>
         {icon && <div className={cn("grid h-9 w-9 place-items-center rounded-md", tones[tone])}>{icon}</div>}
       </div>
       <div className="mt-3 flex items-baseline gap-1.5">
         <span className="ltr font-mono text-3xl font-semibold text-foreground">{value}</span>
-        {unit && <span className="ltr text-sm text-muted-foreground">{unit}</span>}
+        {unit && <span className="text-sm text-muted-foreground">{unit}</span>}
       </div>
       {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
     </div>
@@ -204,12 +222,9 @@ export function RoleGate({ allow, children }: { allow: Role[]; children: ReactNo
         <Lock className="h-5 w-5" />
       </div>
       <h2 className="text-lg font-semibold">غير مصرح بالوصول</h2>
-      <p className="ltr text-xs text-muted-foreground">Access not permitted for your role</p>
-      <p className="mt-3 text-sm text-muted-foreground">
-        هذه الصفحة غير متاحة لدورك الحالي في النظام.
-      </p>
+      <p className="mt-3 text-sm text-muted-foreground">هذه الصفحة غير متاحة لدورك الحالي في النظام.</p>
       <Button asChild variant="navy" className="mt-5">
-        <Link to={role === "responder" ? "/field" : "/dashboard"}>العودة للصفحة الرئيسية</Link>
+        <Link to={ROLE_HOME[role]}>العودة إلى صفحتك الرئيسية</Link>
       </Button>
     </div>
   );

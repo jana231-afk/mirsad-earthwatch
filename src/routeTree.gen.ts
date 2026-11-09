@@ -21,7 +21,6 @@ import { Route as ConsoleIncidentsIndexRouteImport } from './routes/_console.inc
 import { Route as ConsoleIncidentsIdRouteImport } from './routes/_console.incidents.$id'
 import { Route as ConsoleIncidentsNewRouteImport } from './routes/_console.incidents.new'
 import { Route as ConsoleReportsIndexRouteImport } from './routes/_console.reports.index'
-import { Route as ConsoleReportsRunIdRouteImport } from './routes/_console.reports.$runId'
 import { Route as ConsoleResultsRunIdRouteImport } from './routes/_console.results.$runId'
 import { Route as ConsoleReviewRunIdRouteImport } from './routes/_console.review.$runId'
 import { Route as ConsoleIncidentsIdAnalyzeRouteImport } from './routes/_console.incidents.$id_.analyze'
@@ -86,11 +85,6 @@ const ConsoleReportsIndexRoute = ConsoleReportsIndexRouteImport.update({
   path: '/reports/',
   getParentRoute: () => ConsoleRoute,
 } as any)
-const ConsoleReportsRunIdRoute = ConsoleReportsRunIdRouteImport.update({
-  id: '/reports/$runId',
-  path: '/reports/$runId',
-  getParentRoute: () => ConsoleRoute,
-} as any)
 const ConsoleResultsRunIdRoute = ConsoleResultsRunIdRouteImport.update({
   id: '/results/$runId',
   path: '/results/$runId',
@@ -122,7 +116,6 @@ export interface FileRoutesByFullPath {
   '/field/$id': typeof ConsoleFieldIdRoute
   '/incidents/$id': typeof ConsoleIncidentsIdRoute
   '/incidents/new': typeof ConsoleIncidentsNewRoute
-  '/reports/$runId': typeof ConsoleReportsRunIdRoute
   '/results/$runId': typeof ConsoleResultsRunIdRoute
   '/review/$runId': typeof ConsoleReviewRunIdRoute
   '/field/': typeof ConsoleFieldIndexRoute
@@ -140,7 +133,6 @@ export interface FileRoutesByTo {
   '/field/$id': typeof ConsoleFieldIdRoute
   '/incidents/$id': typeof ConsoleIncidentsIdRoute
   '/incidents/new': typeof ConsoleIncidentsNewRoute
-  '/reports/$runId': typeof ConsoleReportsRunIdRoute
   '/results/$runId': typeof ConsoleResultsRunIdRoute
   '/review/$runId': typeof ConsoleReviewRunIdRoute
   '/field': typeof ConsoleFieldIndexRoute
@@ -160,7 +152,6 @@ export interface FileRoutesById {
   '/_console/field/$id': typeof ConsoleFieldIdRoute
   '/_console/incidents/$id': typeof ConsoleIncidentsIdRoute
   '/_console/incidents/new': typeof ConsoleIncidentsNewRoute
-  '/_console/reports/$runId': typeof ConsoleReportsRunIdRoute
   '/_console/results/$runId': typeof ConsoleResultsRunIdRoute
   '/_console/review/$runId': typeof ConsoleReviewRunIdRoute
   '/_console/field/': typeof ConsoleFieldIndexRoute
@@ -180,7 +171,6 @@ export interface FileRouteTypes {
     | '/field/$id'
     | '/incidents/$id'
     | '/incidents/new'
-    | '/reports/$runId'
     | '/results/$runId'
     | '/review/$runId'
     | '/field/'
@@ -198,7 +188,6 @@ export interface FileRouteTypes {
     | '/field/$id'
     | '/incidents/$id'
     | '/incidents/new'
-    | '/reports/$runId'
     | '/results/$runId'
     | '/review/$runId'
     | '/field'
@@ -217,7 +206,6 @@ export interface FileRouteTypes {
     | '/_console/field/$id'
     | '/_console/incidents/$id'
     | '/_console/incidents/new'
-    | '/_console/reports/$runId'
     | '/_console/results/$runId'
     | '/_console/review/$runId'
     | '/_console/field/'
@@ -318,13 +306,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsoleReportsIndexRouteImport
       parentRoute: typeof ConsoleRoute
     }
-    '/_console/reports/$runId': {
-      id: '/_console/reports/$runId'
-      path: '/reports/$runId'
-      fullPath: '/reports/$runId'
-      preLoaderRoute: typeof ConsoleReportsRunIdRouteImport
-      parentRoute: typeof ConsoleRoute
-    }
     '/_console/results/$runId': {
       id: '/_console/results/$runId'
       path: '/results/$runId'
@@ -364,7 +345,6 @@ interface ConsoleRouteChildren {
   ConsoleFieldIdRoute: typeof ConsoleFieldIdRoute
   ConsoleIncidentsIdRoute: typeof ConsoleIncidentsIdRoute
   ConsoleIncidentsNewRoute: typeof ConsoleIncidentsNewRoute
-  ConsoleReportsRunIdRoute: typeof ConsoleReportsRunIdRoute
   ConsoleResultsRunIdRoute: typeof ConsoleResultsRunIdRoute
   ConsoleReviewRunIdRoute: typeof ConsoleReviewRunIdRoute
   ConsoleFieldIndexRoute: typeof ConsoleFieldIndexRoute
@@ -382,7 +362,6 @@ const ConsoleRouteChildren: ConsoleRouteChildren = {
   ConsoleFieldIdRoute: ConsoleFieldIdRoute,
   ConsoleIncidentsIdRoute: ConsoleIncidentsIdRoute,
   ConsoleIncidentsNewRoute: ConsoleIncidentsNewRoute,
-  ConsoleReportsRunIdRoute: ConsoleReportsRunIdRoute,
   ConsoleResultsRunIdRoute: ConsoleResultsRunIdRoute,
   ConsoleReviewRunIdRoute: ConsoleReviewRunIdRoute,
   ConsoleFieldIndexRoute: ConsoleFieldIndexRoute,

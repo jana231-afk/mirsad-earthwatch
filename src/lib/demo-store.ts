@@ -6,12 +6,14 @@ import { useSyncExternalStore } from "react";
 import {
   INCIDENTS,
   IMAGES,
+  REPORTS,
   RUNS,
   USERS,
   type AnalysisRun,
+  type GeoImage,
   type Incident,
+  type Report,
   type Role,
-  type SatImage,
   type User,
 } from "./demo-data";
 
@@ -19,8 +21,9 @@ export interface DemoState {
   role: Role;
   userName: string;
   incidents: Incident[];
-  images: SatImage[];
+  images: GeoImage[];
   runs: AnalysisRun[];
+  reports: Report[];
   users: User[];
 }
 
@@ -30,6 +33,7 @@ const initial: DemoState = {
   incidents: INCIDENTS,
   images: IMAGES,
   runs: RUNS,
+  reports: REPORTS,
   users: USERS,
 };
 
@@ -64,8 +68,10 @@ function subscribe(l: () => void) {
       const raw = window.localStorage.getItem("mirsad-demo-session");
       if (raw) {
         const s = JSON.parse(raw) as { role: Role; userName: string };
-        state = { ...state, role: s.role, userName: s.userName };
-        queueMicrotask(emit);
+        if (s.role === "admin" || s.role === "analyst" || s.role === "responder") {
+          state = { ...state, role: s.role, userName: s.userName };
+          queueMicrotask(emit);
+        }
       }
     } catch {
       /* ignore */
@@ -82,6 +88,12 @@ export function useDemo(): DemoState {
   );
 }
 
+export function nowStamp() {
+  const now = new Date();
+  const d = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  return `${d} ${now.toTimeString().slice(0, 5)}`;
+}
+
 export const demoActions = {
   login(role: Role, userName: string) {
     set({ role, userName });
@@ -92,20 +104,21 @@ export const demoActions = {
   updateIncident(id: string, patch: Partial<Incident>) {
     set({ incidents: state.incidents.map((i) => (i.id === id ? { ...i, ...patch } : i)) });
   },
-  addImage(image: SatImage) {
-    set({ images: [image, ...state.images] });
+  addImages(images: GeoImage[]) {
+    set({ images: [...images, ...state.images] });
   },
   addRun(run: AnalysisRun) {
     set({ runs: [run, ...state.runs] });
   },
   reviewRun(id: string, status: "reviewed" | "correction", notes: string, reviewer: string) {
-    const now = new Date();
-    const stamp = `${now.toISOString().slice(0, 10)} ${now.toTimeString().slice(0, 5)}`;
     set({
       runs: state.runs.map((r) =>
-        r.id === id ? { ...r, status, reviewNotes: notes, reviewer, reviewedAt: stamp } : r,
+        r.id === id ? { ...r, status, reviewNotes: notes, reviewer, reviewedAt: nowStamp() } : r,
       ),
     });
+  },
+  addReport(report: Report) {
+    set({ reports: [report, ...state.reports] });
   },
   addUser(user: User) {
     set({ users: [...state.users, user] });
@@ -120,4 +133,19 @@ export function latestReviewedRun(runs: AnalysisRun[], incidentId: string) {
   return runs
     .filter((r) => r.incidentId === incidentId && r.status === "reviewed")
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
+}
+
+/** Images of an incident sorted by acquisition date (oldest first). */
+export function incidentImages(images: GeoImage[], incidentId: string) {
+  return images
+    .filter((m) => m.incidentId === incidentId)
+    .sort((a, b) => a.acquisitionDate.localeCompare(b.acquisitionDate));
+}
+
+export function nextId(prefix: string, existing: { id: string }[]) {
+  const max = existing.reduce((m, x) => {
+    const n = Number(x.id.split("-").pop());
+    return Number.isFinite(n) && n > m ? n : m;
+  }, 0);
+  return `${prefix}-${String(max + 1).padStart(4, "0")}`;
 }

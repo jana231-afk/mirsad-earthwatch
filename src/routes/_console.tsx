@@ -31,7 +31,7 @@ function ConsoleLayout() {
             <div className="text-end leading-tight">
               <div className="text-sm font-semibold">{userName}</div>
               <div className="text-[11px] text-muted-foreground">
-                {ROLE_LABELS[role].ar} · <span className="ltr">{ROLE_LABELS[role].en}</span>
+                {ROLE_LABELS[role]}
               </div>
             </div>
             <div className="grid h-9 w-9 place-items-center rounded-full bg-secondary text-navy">

@@ -1,29 +1,20 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import {
-  LayoutDashboard,
-  FolderOpen,
-  UploadCloud,
-  History,
-  FileText,
-  Users,
-  LogOut,
-  MapPinned,
-} from "lucide-react";
+import { LayoutDashboard, FolderOpen, UploadCloud, History, FileText, Users, LogOut, MapPinned } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDemo } from "@/lib/demo-store";
 import type { Role } from "@/lib/demo-data";
 import { Logo, LogoMark } from "./Logo";
 
-type Item = { title: string; en: string; to: string; icon: typeof LayoutDashboard; roles: Role[] };
+type Item = { title: string; to: string; icon: typeof LayoutDashboard; roles: Role[] };
 
 const ITEMS: Item[] = [
-  { title: "لوحة المعلومات", en: "Dashboard", to: "/dashboard", icon: LayoutDashboard, roles: ["analyst", "admin"] },
-  { title: "الحوادث", en: "Incidents", to: "/incidents", icon: FolderOpen, roles: ["analyst"] },
-  { title: "رفع صورة فضائية", en: "Upload Satellite Image", to: "/upload", icon: UploadCloud, roles: ["analyst"] },
-  { title: "سجل التحليلات", en: "Analysis History", to: "/history", icon: History, roles: ["analyst"] },
-  { title: "التقارير", en: "Reports", to: "/reports", icon: FileText, roles: ["analyst"] },
-  { title: "الحوادث المصرح بها", en: "Authorized Incidents", to: "/field", icon: MapPinned, roles: ["responder"] },
-  { title: "إدارة المستخدمين", en: "User Management", to: "/users", icon: Users, roles: ["admin"] },
+  { title: "لوحة التحكم", to: "/dashboard", icon: LayoutDashboard, roles: ["analyst"] },
+  { title: "الحالات", to: "/incidents", icon: FolderOpen, roles: ["analyst"] },
+  { title: "رفع الصور", to: "/upload", icon: UploadCloud, roles: ["analyst"] },
+  { title: "سجل التحليلات", to: "/history", icon: History, roles: ["analyst"] },
+  { title: "الحالات المصرح بها", to: "/field", icon: MapPinned, roles: ["responder"] },
+  { title: "التقارير", to: "/reports", icon: FileText, roles: ["analyst", "responder"] },
+  { title: "إدارة المستخدمين", to: "/users", icon: Users, roles: ["admin"] },
 ];
 
 export function AppSidebar({ collapsed }: { collapsed: boolean }) {
@@ -45,15 +36,13 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
       )}
     >
       <div className={cn("flex h-16 items-center border-b border-sidebar-border", collapsed ? "justify-center" : "px-4")}>
-        {collapsed ? <LogoMark /> : <Logo inverted />}
+        <Link to="/" aria-label="الصفحة الرئيسية للمنصة">
+          {collapsed ? <LogoMark /> : <Logo inverted />}
+        </Link>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {!collapsed && (
-          <div className="px-2 pb-2 pt-1 text-[11px] font-semibold uppercase tracking-wider text-navy-muted">
-            القائمة الرئيسية
-          </div>
-        )}
+        {!collapsed && <div className="px-2 pb-2 pt-1 text-[11px] font-semibold text-navy-muted">القائمة الرئيسية</div>}
         {ITEMS.filter((i) => i.roles.includes(role)).map((item) => {
           const active = isActive(item.to);
           return (
@@ -71,12 +60,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
               )}
             >
               <item.icon className={cn("h-[18px] w-[18px] shrink-0", active && "text-sidebar-primary")} />
-              {!collapsed && (
-                <span className="flex min-w-0 flex-col leading-tight">
-                  <span className="font-medium">{item.title}</span>
-                  <span className="ltr text-[10.5px] text-navy-muted">{item.en}</span>
-                </span>
-              )}
+              {!collapsed && <span className="font-medium">{item.title}</span>}
               {active && !collapsed && <span className="ms-auto h-5 w-1 rounded-full bg-sidebar-primary" />}
             </Link>
           );
@@ -94,12 +78,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
           )}
         >
           <LogOut className="h-[18px] w-[18px] shrink-0 rtl:rotate-180" />
-          {!collapsed && (
-            <span className="flex flex-col items-start leading-tight">
-              <span className="font-medium">تسجيل الخروج</span>
-              <span className="ltr text-[10.5px] text-navy-muted">Logout</span>
-            </span>
-          )}
+          {!collapsed && <span className="font-medium">تسجيل الخروج</span>}
         </button>
       </div>
     </aside>

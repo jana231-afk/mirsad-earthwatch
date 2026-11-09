@@ -40,16 +40,16 @@ export function MapLegend({ kind, hasNodata = true, className }: { kind: "flood"
     <div className={cn("space-y-1.5 text-xs", className)}>
       <div className="flex items-center gap-2">
         <span className={cn("h-3 w-4 rounded-sm", kind === "flood" ? "bg-water" : "bg-burn")} />
-        <span>{kind === "flood" ? "مياه مكتشفة · Detected water" : "منطقة محترقة · Burned area"}</span>
+        <span>{kind === "flood" ? "المنطقة المتأثرة (مياه)" : "المنطقة المتأثرة (محروقة)"}</span>
       </div>
       <div className="flex items-center gap-2">
         <span className="h-3 w-4 rounded-sm border border-foreground/20 bg-valid" />
-        <span>منطقة صالحة غير متأثرة · Valid non-affected</span>
+        <span>المنطقة السليمة</span>
       </div>
       {hasNodata && (
         <div className="flex items-center gap-2">
           <span className="bg-hatch-nodata h-3 w-4 rounded-sm" />
-          <span>لا توجد بيانات · NoData</span>
+          <span>بدون بيانات</span>
         </div>
       )}
     </div>
@@ -140,7 +140,7 @@ export function MapViewer({
           style={{ transform: `translate(${off.x}px, ${off.y}px) scale(${z})` }}
         >
           {show.base ? (
-            <img src={base} alt="صورة القمر الصناعي" draggable={false} className="absolute inset-0 h-full w-full object-fill" />
+            <img src={base} alt="الصورة الجغرافية" draggable={false} className="absolute inset-0 h-full w-full object-fill" />
           ) : (
             <div className="absolute inset-0 bg-valid" />
           )}
@@ -156,25 +156,25 @@ export function MapViewer({
 
         {showControls && (
           <div className="absolute left-3 top-3 flex flex-col overflow-hidden rounded-md border bg-card/95 shadow-panel">
-            <button type="button" aria-label="تكبير Zoom in" onClick={() => zoomBy(1.5)} className="grid h-8 w-8 place-items-center hover:bg-secondary disabled:opacity-40" disabled={z >= MAX_Z}>
+            <button type="button" aria-label="تكبير" onClick={() => zoomBy(1.5)} className="grid h-8 w-8 place-items-center hover:bg-secondary disabled:opacity-40" disabled={z >= MAX_Z}>
               <Plus className="h-4 w-4" />
             </button>
-            <button type="button" aria-label="تصغير Zoom out" onClick={() => zoomBy(1 / 1.5)} className="grid h-8 w-8 place-items-center border-t hover:bg-secondary disabled:opacity-40" disabled={z <= MIN_Z}>
+            <button type="button" aria-label="تصغير" onClick={() => zoomBy(1 / 1.5)} className="grid h-8 w-8 place-items-center border-t hover:bg-secondary disabled:opacity-40" disabled={z <= MIN_Z}>
               <Minus className="h-4 w-4" />
             </button>
-            <button type="button" aria-label="إعادة الضبط Reset view" onClick={reset} className="grid h-8 w-8 place-items-center border-t hover:bg-secondary">
+            <button type="button" aria-label="إعادة ضبط العرض" onClick={reset} className="grid h-8 w-8 place-items-center border-t hover:bg-secondary">
               <Maximize2 className="h-3.5 w-3.5" />
             </button>
           </div>
         )}
 
         <div className="pointer-events-none absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full border bg-card/90 text-[11px] font-bold text-foreground">
-          N
+          ش
         </div>
 
         <div className="pointer-events-none absolute bottom-3 left-3 rounded bg-card/90 px-2 py-1 text-[10px] text-foreground">
           <div className="h-1.5 border-x border-b border-foreground" style={{ width: barPx }} />
-          <div className="mt-0.5 font-mono">{barKm} km</div>
+          <div className="mt-0.5 font-mono">{barKm} كم</div>
         </div>
 
         <div className="pointer-events-none absolute bottom-3 right-3 rounded bg-card/90 px-2 py-1 font-mono text-[10px] text-muted-foreground">
@@ -183,7 +183,7 @@ export function MapViewer({
 
         {showLegend && mask && (
           <div dir="rtl" className="pointer-events-none absolute bottom-12 right-3 rounded-md border bg-card/95 p-3 text-foreground shadow-panel">
-            <div className="mb-2 text-[11px] font-semibold text-muted-foreground">مفتاح الخريطة · Legend</div>
+            <div className="mb-2 text-[11px] font-semibold text-muted-foreground">مفتاح الخريطة</div>
             <MapLegend kind={kind} hasNodata={!!nodata} />
           </div>
         )}
@@ -192,13 +192,13 @@ export function MapViewer({
       {showLayerPanel && (
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t px-4 py-2.5 text-xs">
           <span className="flex items-center gap-1.5 font-semibold text-muted-foreground">
-            <Layers className="h-3.5 w-3.5" /> الطبقات · Layers
+            <Layers className="h-3.5 w-3.5" /> الطبقات
           </span>
-          <LayerToggle label="صورة القمر الصناعي" checked={show.base} onChange={(v) => setShow({ ...show, base: v })} />
+          <LayerToggle label="الصورة الأصلية" checked={show.base} onChange={(v) => setShow({ ...show, base: v })} />
           {mask && (
-            <LayerToggle label="قناع التجزئة · Mask" checked={show.mask} onChange={(v) => setShow({ ...show, mask: v })} />
+            <LayerToggle label="نتيجة التحليل" checked={show.mask} onChange={(v) => setShow({ ...show, mask: v })} />
           )}
-          {nodata && <LayerToggle label="NoData" checked={show.nodata} onChange={(v) => setShow({ ...show, nodata: v })} />}
+          {nodata && <LayerToggle label="بدون بيانات" checked={show.nodata} onChange={(v) => setShow({ ...show, nodata: v })} />}
           {mask && (
             <label className="flex items-center gap-2 text-muted-foreground">
               الشفافية
@@ -246,7 +246,7 @@ export function BinaryMask({ mask, nodata, className, label }: { mask: string; n
 export function ImageThumb({ src, label, className }: { src: string; label?: string | undefined; className?: string }) {
   return (
     <div className={cn("relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-map", className)}>
-      <img src={src} alt={label ?? "صورة القمر الصناعي"} className="h-full w-full object-cover" loading="lazy" />
+      <img src={src} alt={label ?? "الصورة الجغرافية"} className="h-full w-full object-cover" loading="lazy" />
       {label && (
         <span className="absolute right-2 top-2 rounded bg-card/90 px-2 py-0.5 text-[11px] font-medium text-foreground">{label}</span>
       )}
