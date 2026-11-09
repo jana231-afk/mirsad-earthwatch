@@ -11,6 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ConsoleRouteImport } from './routes/_console'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as DemoMapRouteImport } from './routes/demo-map'
+import { Route as DisasterTypesRouteImport } from './routes/disaster-types'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConsoleDashboardRouteImport } from './routes/_console.dashboard'
 import { Route as ConsoleHistoryRouteImport } from './routes/_console.history'
 import { Route as ConsoleUploadRouteImport } from './routes/_console.upload'
@@ -33,6 +40,41 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const ConsoleRoute = ConsoleRouteImport.update({
   id: '/_console',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoMapRoute = DemoMapRouteImport.update({
+  id: '/demo-map',
+  path: '/demo-map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisasterTypesRoute = DisasterTypesRouteImport.update({
+  id: '/disaster-types',
+  path: '/disaster-types',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConsoleDashboardRoute = ConsoleDashboardRouteImport.update({
@@ -109,6 +151,13 @@ const ConsoleIncidentsIdEditRoute = ConsoleIncidentsIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/demo-map': typeof DemoMapRoute
+  '/disaster-types': typeof DisasterTypesRoute
+  '/faq': typeof FaqRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/dashboard': typeof ConsoleDashboardRoute
   '/history': typeof ConsoleHistoryRoute
   '/upload': typeof ConsoleUploadRoute
@@ -126,6 +175,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/demo-map': typeof DemoMapRoute
+  '/disaster-types': typeof DisasterTypesRoute
+  '/faq': typeof FaqRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/dashboard': typeof ConsoleDashboardRoute
   '/history': typeof ConsoleHistoryRoute
   '/upload': typeof ConsoleUploadRoute
@@ -145,6 +201,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_console': typeof ConsoleRouteWithChildren
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/demo-map': typeof DemoMapRoute
+  '/disaster-types': typeof DisasterTypesRoute
+  '/faq': typeof FaqRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
   '/_console/dashboard': typeof ConsoleDashboardRoute
   '/_console/history': typeof ConsoleHistoryRoute
   '/_console/upload': typeof ConsoleUploadRoute
@@ -164,6 +227,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
+    | '/contact'
+    | '/demo-map'
+    | '/disaster-types'
+    | '/faq'
+    | '/how-it-works'
+    | '/login'
     | '/dashboard'
     | '/history'
     | '/upload'
@@ -181,6 +251,13 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
+    | '/contact'
+    | '/demo-map'
+    | '/disaster-types'
+    | '/faq'
+    | '/how-it-works'
+    | '/login'
     | '/dashboard'
     | '/history'
     | '/upload'
@@ -199,6 +276,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_console'
+    | '/about'
+    | '/contact'
+    | '/demo-map'
+    | '/disaster-types'
+    | '/faq'
+    | '/how-it-works'
+    | '/login'
     | '/_console/dashboard'
     | '/_console/history'
     | '/_console/upload'
@@ -218,6 +302,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConsoleRoute: typeof ConsoleRouteWithChildren
+  AboutRoute: typeof AboutRoute
+  ContactRoute: typeof ContactRoute
+  DemoMapRoute: typeof DemoMapRoute
+  DisasterTypesRoute: typeof DisasterTypesRoute
+  FaqRoute: typeof FaqRoute
+  HowItWorksRoute: typeof HowItWorksRoute
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -234,6 +325,55 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof ConsoleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo-map': {
+      id: '/demo-map'
+      path: '/demo-map'
+      fullPath: '/demo-map'
+      preLoaderRoute: typeof DemoMapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/disaster-types': {
+      id: '/disaster-types'
+      path: '/disaster-types'
+      fullPath: '/disaster-types'
+      preLoaderRoute: typeof DisasterTypesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_console/dashboard': {
@@ -377,6 +517,13 @@ const ConsoleRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConsoleRoute: ConsoleRouteWithChildren,
+  AboutRoute: AboutRoute,
+  ContactRoute: ContactRoute,
+  DemoMapRoute: DemoMapRoute,
+  DisasterTypesRoute: DisasterTypesRoute,
+  FaqRoute: FaqRoute,
+  HowItWorksRoute: HowItWorksRoute,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

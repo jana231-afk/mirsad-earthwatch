@@ -7,10 +7,10 @@ import { demoActions, useDemo } from "@/lib/demo-store";
 export const Route = createFileRoute("/_console/incidents/$id_/edit")({
   head: () => ({
     meta: [
-      { title: "تعديل الحادثة · MIRSAD" },
-      { name: "description", content: "Edit an incident record in MIRSAD." },
-      { property: "og:title", content: "Edit Incident · MIRSAD" },
-      { property: "og:description", content: "Update incident name, type, location, date and status." },
+      { title: "تعديل الحالة · مِرصاد" },
+      { name: "description", content: "تعديل بيانات حالة كارثة في مِرصاد." },
+      { property: "og:title", content: "تعديل الحالة · مِرصاد" },
+      { property: "og:description", content: "تحديث اسم الحالة ونوعها وموقعها وتاريخيها." },
     ],
   }),
   component: () => (
@@ -25,25 +25,19 @@ function EditIncident() {
   const navigate = useNavigate();
   const { incidents } = useDemo();
   const inc = incidents.find((i) => i.id === id);
-  if (!inc) return <EmptyState title="الحادثة غير موجودة" />;
+  if (!inc) return <EmptyState title="الحالة غير موجودة" />;
   return (
     <>
       <PageHeader
-        title="تعديل الحادثة"
-        en="Edit Incident"
-        crumbs={[
-          { label: "الحوادث", to: "/incidents" },
-          { label: inc.name, to: "/incidents/$id", params: { id } },
-          { label: "تعديل" },
-        ]}
+        title="تعديل الحالة"
+        crumbs={[{ label: "الحالات", to: "/incidents" }, { label: inc.name, to: "/incidents/$id", params: { id } }, { label: "تعديل" }]}
       />
-      <Panel title="بيانات الحادثة" en="Incident information" className="max-w-3xl">
+      <Panel title="بيانات الحالة" className="max-w-3xl">
         <IncidentForm
-          isEdit
           initial={inc}
           onCancel={() => navigate({ to: "/incidents/$id", params: { id } })}
           onSubmit={(v) => {
-            demoActions.updateIncident(id, { ...v, name: v.name.trim(), location: v.location.trim() });
+            demoActions.updateIncident(id, v);
             toast.success("تم حفظ التعديلات");
             navigate({ to: "/incidents/$id", params: { id } });
           }}
