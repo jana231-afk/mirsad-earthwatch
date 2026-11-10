@@ -1,159 +1,74 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, AlertTriangle, RotateCcw, Eye, FileText } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  PageHeader,
-  Panel,
-  RoleGate,
-  EmptyState,
-  RunStatusBadge,
-  ExperimentalBadge,
-  TypeBadge,
-  Notice,
-} from "@/components/mirsad/bits";
-import { MapViewer } from "@/components/mirsad/MapViewer";
+import { PageHeader, Panel, RoleGate, EmptyState, RunStatusBadge, ExperimentalBadge, Notice } from "@/components/mirsad/bits";
+import { MapViewer, ImageThumb } from "@/components/mirsad/MapViewer";
 import { AreaStats, RunInfo } from "@/components/mirsad/RunSummary";
+import { DayTabs } from "@/components/mirsad/DayTabs";
 import { demoActions, useDemo } from "@/lib/demo-store";
+import { formatDate } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_console/review/$runId")({
   head: () => ({
     meta: [
-      { title: "مراجعة المحلل · MIRSAD" },
-      { name: "description", content: "GIS analyst review of a segmentation result: compare with the original image, add notes and approve." },
-      { property: "og:title", content: "Analyst Review · MIRSAD" },
-      { property: "og:description", content: "Mark analysis results as reviewed or needing correction." },
+      { title: "مراجعة المحلل · مِرصاد" },
+      { name: "description", content: "مراجعة نتيجة التحليل الآلي واعتمادها أو طلب تصحيحها." },
+      { property: "og:title", content: "مراجعة المحلل · مِرصاد" },
+      { property: "og:description", content: "اعتماد نتيجة التحليل قبل مشاركتها." },
     ],
   }),
-  component: () => (
-    <RoleGate allow={["analyst"]}>
-      <ReviewPage />
-    </RoleGate>
-  ),
+  component: () => (<RoleGate allow={["analyst"]}><Review /></RoleGate>),
 });
 
-function ReviewPage() {
+function Review() {
   const { runId } = Route.useParams();
+  const navigate = useNavigate();
   const { runs, incidents, images, userName } = useDemo();
   const run = runs.find((r) => r.id === runId);
+  const [idx, setIdx] = useState(run ? run.days.length - 1 : 0);
   const [notes, setNotes] = useState(run?.reviewNotes ?? "");
   const [err, setErr] = useState("");
-  if (!run) return <EmptyState title="التحليل غير موجود" />;
-  const inc = incidents.find((i) => i.id === run.incidentId)!;
-  const runImages = images.filter((m) => run.imageIds.includes(m.id));
-  const warnings = runImages.flatMap((m) => m.warnings.map((w) => ({ id: m.id, w })));
+  const inc = run && incidents.find((i) => i.id === run.incidentId);
+  if (!run || !inc) return <EmptyState title="التحليل غير موجود" />;
+  const d = run.days[Math.min(idx, run.days.length - 1)]!;
+  const img = images.find((m) => m.id === d.imageId);
+  const warnings = images.filter((m) => run.imageIds.includes(m.id)).flatMap((m) => m.warnings.map((w) => `${formatDate(m.acquisitionDate)}: ${w}`));
 
   const act = (status: "reviewed" | "correction") => {
-    if (status === "correction" && !notes.trim()) {
-      setErr("يرجى كتابة ملاحظات توضح التصحيح المطلوب.");
-      return;
-    }
-    setErr("");
+    if (status === "correction" && !notes.trim()) { setErr("يرجى كتابة ملاحظة توضح المطلوب تصحيحه."); return; }
     demoActions.reviewRun(run.id, status, notes.trim(), userName);
-    toast.success(status === "reviewed" ? "تم اعتماد النتيجة" : "تم تحديد النتيجة كـ «يحتاج تصحيح»", {
-      description: status === "reviewed" ? "أصبحت النتيجة مرئية للمستجيبين الميدانيين المصرح لهم." : "لن تظهر النتيجة للمستجيبين.",
-    });
+    toast.success(status === "reviewed" ? "تم اعتماد النتيجة كمراجَعة" : "تم تحديد النتيجة كتحتاج إلى تصحيح");
+    navigate({ to: "/results/$runId", params: { runId: run.id }, search: {} });
   };
 
   return (
     <>
-      <PageHeader
-        crumbs={[
-          { label: "الحوادث", to: "/incidents" },
-          { label: inc.name, to: "/incidents/$id", params: { id: inc.id } },
-          { label: `مراجعة ${run.id}` },
-        ]}
-        title="مراجعة المحلل"
-        en="Analyst Review"
-        description={
-          <span className="flex flex-wrap items-center gap-2">
-            <span className="ltr font-mono text-xs">{run.id}</span>
-            <TypeBadge type={inc.type} />
-            <span>الحالة الحالية:</span>
-            <RunStatusBadge status={run.status} />
-            {run.experimental && <ExperimentalBadge />}
-          </span>
-        }
-        actions={
-          <Button asChild variant="outline">
-            <Link to="/results/$runId" params={{ runId: run.id }}>
-              <Eye /> صفحة النتائج
-            </Link>
-          </Button>
-        }
-      />
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div>
-          <div className="mb-2 text-sm font-semibold">الصورة الأصلية <span className="ltr text-xs font-normal text-muted-foreground">Original image</span></div>
-          <MapViewer base={run.layers.base} nodata={run.layers.nodata} kind={inc.type} showLegend={false} />
-        </div>
-        <div>
-          <div className="mb-2 text-sm font-semibold">نتيجة التجزئة <span className="ltr text-xs font-normal text-muted-foreground">Segmentation result</span></div>
-          <MapViewer base={run.layers.base} mask={run.layers.mask} nodata={run.layers.nodata} kind={inc.type} />
-        </div>
+      <PageHeader title="مراجعة المحلل" crumbs={[{ label: "سجل التحليلات", to: "/history" }, { label: run.id }]}
+        description={<span className="flex flex-wrap items-center gap-2">{inc.name} <RunStatusBadge status={run.status} /> {run.experimental && <ExperimentalBadge />}</span>} />
+      <div className="mb-4"><DayTabs days={run.days} value={idx} onChange={setIdx} /></div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Panel title="الصورة الأصلية">{img && <ImageThumb src={d.layers.base} label={formatDate(d.date)} />}</Panel>
+        <Panel title="النتيجة"><MapViewer key={d.imageId} {...d.layers} kind={inc.type} showLayerPanel={false} /></Panel>
       </div>
-
       <div className="mt-6 grid gap-6 xl:grid-cols-3">
-        <Panel title="إحصاءات المساحة" en="Area statistics">
-          <AreaStats run={run} kind={inc.type} />
-        </Panel>
-
-        <Panel title="معلومات التحليل" en="Analysis information">
-          <RunInfo run={run} images={runImages} />
-        </Panel>
-
-        <div className="space-y-6">
-          <Panel title="تحذيرات التحقق من الصورة" en="Image validation warnings">
-            {warnings.length === 0 ? (
-              <Notice tone="success" icon={<CheckCircle2 className="h-4 w-4" />}>لا توجد تحذيرات.</Notice>
-            ) : (
-              <div className="space-y-2">
-                {warnings.map(({ id, w }) => (
-                  <Notice key={id + w} tone="warning" icon={<AlertTriangle className="h-4 w-4" />}>
-                    <span className="ltr me-1 font-mono text-[11px]">{id}</span> {w}
-                  </Notice>
-                ))}
-              </div>
-            )}
-          </Panel>
-
-          <Panel title="قرار المراجعة" en="Review decision">
-            <label htmlFor="notes" className="mb-1.5 block text-sm font-medium">ملاحظات المراجعة <span className="ltr text-xs text-muted-foreground">Review notes</span></label>
-            <textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={5}
-              maxLength={1000}
-              placeholder="مثال: الحدود متوافقة مع الصورة، مع وجود بقع صغيرة مصنفة خطأً على المرتفعات…"
-              className="field h-auto py-2"
-            />
-            {err && <p className="mt-1 text-xs text-destructive">{err}</p>}
-            <div className="mt-4 grid gap-2">
-              <Button variant="success" size="lg" onClick={() => act("reviewed")}>
-                <CheckCircle2 /> تمت المراجعة · Mark as Reviewed
-              </Button>
-              <Button variant="outline-destructive" size="lg" onClick={() => act("correction")}>
-                <RotateCcw /> يحتاج تصحيح · Needs Correction
-              </Button>
+        <Panel title="الإحصاءات"><AreaStats day={d} kind={inc.type} /></Panel>
+        <Panel title="معلومات التحليل"><RunInfo run={run} images={images} day={d} /></Panel>
+        <Panel title="قرار المراجعة">
+          <div className="space-y-3">
+            {warnings.length > 0 && <Notice tone="warning" title="تنبيهات التحقق" icon={<AlertTriangle className="h-4 w-4" />}><ul className="list-disc space-y-1 ps-4">{warnings.map((w) => <li key={w}>{w}</li>)}</ul></Notice>}
+            <label className="block space-y-1.5 text-sm"><span className="font-medium">ملاحظات المراجعة</span>
+              <textarea rows={5} maxLength={1000} value={notes} onChange={(e) => { setNotes(e.target.value); setErr(""); }} className="field h-auto py-2" />
+            </label>
+            {err && <p className="text-xs text-destructive">{err}</p>}
+            <div className="flex flex-wrap gap-2">
+              <Button variant="success" onClick={() => act("reviewed")}><CheckCircle2 /> اعتماد كمراجَع</Button>
+              <Button variant="outline-destructive" onClick={() => act("correction")}><AlertTriangle /> يحتاج إلى تصحيح</Button>
             </div>
-            {run.reviewedAt && (
-              <p className="mt-3 text-xs text-muted-foreground">
-                آخر مراجعة: {run.reviewer} · <span className="ltr font-mono">{run.reviewedAt}</span>
-              </p>
-            )}
-            {run.status === "reviewed" && (
-              <Button asChild variant="soft" className="mt-3 w-full">
-                <Link to="/reports/$runId" params={{ runId: run.id }}>
-                  <FileText /> إنشاء تقرير PDF
-                </Link>
-              </Button>
-            )}
-          </Panel>
-          <Notice tone="info">النتائج المعتمدة («تمت المراجعة») فقط تظهر للمستجيبين الميدانيين.</Notice>
-        </div>
+            <p className="flex gap-1.5 text-xs text-muted-foreground"><Info className="h-3.5 w-3.5 shrink-0" /> تظهر للمستجيبين الميدانيين النتائج المراجَعة فقط.</p>
+          </div>
+        </Panel>
       </div>
     </>
   );

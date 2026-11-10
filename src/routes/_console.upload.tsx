@@ -1,26 +1,23 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState, type DragEvent } from "react";
 import { toast } from "sonner";
-import { UploadCloud, FileImage, X, ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Loader2, Save, Info } from "lucide-react";
-import floodPost from "@/assets/flood-post.jpg";
-import firePost from "@/assets/fire-post.jpg";
-import firePre from "@/assets/fire-pre.jpg";
+import { UploadCloud, X, ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Save, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader, Panel, RoleGate, Notice } from "@/components/mirsad/bits";
 import { cn } from "@/lib/utils";
-import { demoActions, useDemo } from "@/lib/demo-store";
-import { SENSORS, type ImageRole } from "@/lib/demo-data";
+import { demoActions, nextId, useDemo } from "@/lib/demo-store";
+import { SENSORS, demoPreview, todayISO, type GeoImage, type ImageRole } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_console/upload")({
   validateSearch: (s: Record<string, unknown>): { incident?: string | undefined } => ({
-    incident: typeof s['incident'] === "string" ? s['incident'] : undefined,
+    incident: typeof s["incident"] === "string" ? s["incident"] : undefined,
   }),
   head: () => ({
     meta: [
-      { title: "رفع صورة فضائية · MIRSAD" },
-      { name: "description", content: "Upload a GeoTIFF satellite image and validate its CRS, dimensions, bands and NoData metadata." },
-      { property: "og:title", content: "Upload Satellite Image · MIRSAD" },
-      { property: "og:description", content: "GeoTIFF upload and metadata validation for disaster analysis." },
+      { title: "رفع الصور · مِرصاد" },
+      { name: "description", content: "رفع صورة جغرافية أو عدة صور بصيغة GeoTIFF والتحقق من بياناتها." },
+      { property: "og:title", content: "رفع الصور · مِرصاد" },
+      { property: "og:description", content: "رفع الصور الجغرافية والتحقق من نظام الإحداثيات والأبعاد والنطاقات." },
     ],
   }),
   component: () => (
@@ -30,284 +27,172 @@ export const Route = createFileRoute("/_console/upload")({
   ),
 });
 
-type Check = { label: string; en: string; value: string; ok: boolean | "warn" };
-type Result = { supported: boolean; checks: Check[]; warnings: string[]; errors: string[] };
+type Check = { label: string; value: string; ok: boolean | "warn" };
+type Item = { key: string; file: File; sensor: string; role: ImageRole; date: string; dateFromMeta: boolean; result?: { supported: boolean; checks: Check[]; warnings: string[] } };
 
-function formatSize(bytes: number) {
-  if (bytes > 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-  return `${(bytes / 1024).toFixed(1)} KB`;
+function dateFromName(name: string) {
+  const m = name.match(/(20\d{2})-?(\d{2})-?(\d{2})/);
+  return m ? `${m[1]}-${m[2]}-${m[3]}` : "";
 }
+const size = (b: number) => (b > 1048576 ? `${(b / 1048576).toFixed(1)} MB` : `${(b / 1024).toFixed(1)} KB`);
 
-function simulateValidation(file: File, sensor: string, manualDate: string): Result {
-  const ext = file.name.toLowerCase().split(".").pop() ?? "";
-  if (!["tif", "tiff"].includes(ext)) {
+function validate(it: Item): NonNullable<Item["result"]> {
+  const ext = it.file.name.toLowerCase().split(".").pop() ?? "";
+  if (!["tif", "tiff"].includes(ext))
     return {
       supported: false,
-      checks: [
-        { label: "قابلية قراءة الملف", en: "File readable", value: "تعذّرت القراءة كملف نقطي جغرافي", ok: false },
-        { label: "نظام الإحداثيات", en: "CRS", value: "—", ok: false },
-        { label: "أبعاد الصورة", en: "Dimensions", value: "—", ok: false },
-        { label: "عدد النطاقات", en: "Bands", value: "—", ok: false },
-        { label: "بيانات NoData", en: "NoData", value: "—", ok: false },
-      ],
-      warnings: [],
-      errors: [`صيغة الملف (.${ext}) غير مدعومة. يقبل النظام ملفات GeoTIFF فقط (.tif / .tiff).`],
+      checks: ["قابلة للقراءة", "نظام الإحداثيات (CRS)", "الأبعاد", "عدد النطاقات", "قيم NoData"].map((l) => ({ label: l, value: "—", ok: false })),
+      warnings: [`صيغة الملف (.${ext}) غير مدعومة. يقبل النظام ملفات GeoTIFF فقط.`],
     };
-  }
-  const isS1 = sensor.startsWith("Sentinel-1");
-  const isLandsat = sensor.startsWith("Landsat");
-  const unknown = sensor.includes("Unknown");
-  const hasDateInName = /20\d{6}/.test(file.name);
+  const radar = it.sensor === "رادارية";
   const warnings: string[] = [];
-  if (!hasDateInName && !manualDate) warnings.push("تاريخ الالتقاط غير موجود في البيانات الوصفية — يرجى إدخاله يدوياً قبل الحفظ.");
-  if (!hasDateInName && manualDate) warnings.push(`تاريخ الالتقاط غير موجود في البيانات الوصفية — سيُستخدم التاريخ المُدخل يدوياً (${manualDate}).`);
-  if (unknown) warnings.push("المستشعر غير معروف — تأكد من توافق ترتيب النطاقات مع مدخلات النموذج.");
-  if (!isS1) warnings.push("تم اكتشاف بكسلات NoData (القيمة 0) بنسبة ≈3.0% — ستُستبعد من حساب المساحة.");
+  if (!it.dateFromMeta) warnings.push(it.date ? "تاريخ الالتقاط غير موجود في البيانات الوصفية، وسيُستخدم التاريخ المُدخل يدوياً." : "تاريخ الالتقاط غير موجود في البيانات الوصفية – يرجى إدخاله.");
+  if (it.sensor === "غير معروف") warnings.push("نوع الصورة غير معروف، تأكد من توافق النطاقات مع النموذج.");
+  if (!radar) warnings.push("توجد بكسلات بدون بيانات (نحو 3%) وستُستبعد من حساب المساحة.");
   return {
     supported: true,
     checks: [
-      { label: "قابلية قراءة الملف", en: "File readable", value: "نعم · GeoTIFF (Rasterio)", ok: true },
-      { label: "نظام الإحداثيات", en: "CRS", value: isLandsat ? "EPSG:32638 — UTM 38N" : "EPSG:32637 — UTM 37N", ok: true },
-      { label: "أبعاد الصورة", en: "Dimensions", value: isLandsat ? "7,621 × 7,751 px · 30 m" : "10,980 × 10,980 px · 10 m", ok: true },
-      { label: "عدد النطاقات", en: "Bands", value: isS1 ? "2 (VV, VH)" : isLandsat ? "7" : "4 (B2, B3, B4, B8)", ok: unknown ? "warn" : true },
-      { label: "بيانات NoData", en: "NoData", value: isS1 ? "غير محددة · Not set" : "0 · ≈3.0%", ok: isS1 ? "warn" : "warn" },
-      { label: "تاريخ الالتقاط", en: "Acquisition date", value: hasDateInName ? "من البيانات الوصفية" : manualDate ? `يدوي: ${manualDate}` : "مفقود · Missing", ok: hasDateInName ? true : "warn" },
+      { label: "قابلة للقراءة", value: "نعم", ok: true },
+      { label: "نظام الإحداثيات (CRS)", value: "EPSG:32637", ok: true },
+      { label: "الأبعاد", value: "1280 × 960", ok: true },
+      { label: "عدد النطاقات", value: radar ? "2" : "4", ok: true },
+      { label: "قيم NoData", value: radar ? "غير محددة" : "0 (نحو 3%)", ok: "warn" },
     ],
     warnings,
-    errors: [],
   };
 }
 
 function UploadPage() {
   const search = Route.useSearch();
-  const navigate = useNavigate();
   const { incidents, images } = useDemo();
-  const openIncidents = incidents.filter((i) => i.status === "open");
-  const [incidentId, setIncidentId] = useState(search.incident ?? openIncidents[0]?.id ?? "");
-  const [imageRole, setImageRole] = useState<ImageRole>("post-event");
-  const [sensor, setSensor] = useState<string>(SENSORS[0] ?? "");
-  const [date, setDate] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const [incidentId, setIncidentId] = useState(search.incident ?? incidents[0]?.id ?? "");
+  const inc = incidents.find((i) => i.id === incidentId);
+  const [items, setItems] = useState<Item[]>([]);
   const [drag, setDrag] = useState(false);
-  const [state, setState] = useState<"idle" | "validating" | "done">("idle");
-  const [result, setResult] = useState<Result | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [saved, setSaved] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
 
-  const incident = incidents.find((i) => i.id === incidentId);
-
-  const pick = (f: File | undefined | null) => {
-    if (!f) return;
-    setFile(f);
-    setState("idle");
-    setResult(null);
+  const add = (files: FileList | null) => {
+    if (!files) return;
+    setSaved(false);
+    setItems((prev) => [
+      ...prev,
+      ...Array.from(files).map((f, i) => {
+        const d = dateFromName(f.name);
+        return { key: `${f.name}-${Date.now()}-${i}`, file: f, sensor: "غير معروف", role: (inc?.type === "fire" ? "post" : "event") as ImageRole, date: d, dateFromMeta: !!d };
+      }),
+    ]);
   };
-
+  const upd = (key: string, p: Partial<Item>) => setItems((l) => l.map((x) => (x.key === key ? { ...x, ...p, result: undefined } : x)));
   const onDrop = (e: DragEvent) => {
     e.preventDefault();
     setDrag(false);
-    pick(e.dataTransfer.files?.[0]);
+    add(e.dataTransfer.files);
   };
-
-  const validate = () => {
-    if (!file) return;
-    setState("validating");
-    setTimeout(() => {
-      setResult(simulateValidation(file, sensor, date));
-      setState("done");
-    }, 1100);
-  };
-
-  const needsDate = result?.supported && !/20\d{6}/.test(file?.name ?? "") && !date;
-  const canSave = !!result?.supported && !!incident && !needsDate;
+  const checkAll = () => setItems((l) => l.map((x) => ({ ...x, result: validate(x) })));
+  const allChecked = items.length > 0 && items.every((x) => x.result);
+  const saveable = items.filter((x) => x.result?.supported && x.date);
 
   const save = () => {
-    if (!file || !result || !incident) return;
-    const n = images.length + 200;
-    const id = `IMG-${n}`;
-    const preview = incident.type === "flood" ? floodPost : imageRole === "pre-event" ? firePre : firePost;
-    demoActions.addImage({
-      id,
-      incidentId: incident.id,
-      fileName: file.name,
-      sizeMB: Math.round((file.size / 1024 / 1024) * 10) / 10,
-      sensor,
-      imageRole,
-      acquisitionDate: date || "2026-11-03",
-      acquisitionDateSource: date ? "manual" : "metadata",
-      crs: result.checks[1]?.value ?? "—",
-      width: 10980,
-      height: 10980,
-      bands: 4,
-      resolution: "10 m",
-      nodata: result.checks[4]?.value ?? "—",
-      status: result.warnings.length ? "warning" : "valid",
-      warnings: result.warnings,
-      uploadedAt: new Date().toISOString().slice(0, 10),
-      preview,
+    if (!inc) return;
+    let pool: { id: string }[] = images;
+    const list: GeoImage[] = saveable.map((x) => {
+      const id = nextId("IMG", pool);
+      pool = [...pool, { id }];
+      return {
+        id, incidentId: inc.id, fileName: x.file.name, sizeMB: +(x.file.size / 1048576).toFixed(1), sensor: x.sensor,
+        imageRole: inc.type === "fire" ? x.role : "event", acquisitionDate: x.date, acquisitionDateSource: x.dateFromMeta ? "metadata" : "manual",
+        crs: "EPSG:32637", width: 1280, height: 960, bands: x.sensor === "رادارية" ? 2 : 4, resolution: "10 م", nodata: "0",
+        status: x.result!.warnings.length ? "warning" : "valid", warnings: x.result!.warnings, uploadedAt: todayISO(), preview: demoPreview(inc.type, x.role),
+      };
     });
-    toast.success("تم حفظ الصورة وربطها بالحادثة", { description: `${id} → ${incident.id}` });
-    navigate({ to: "/incidents/$id", params: { id: incident.id } });
+    demoActions.addImages(list);
+    toast.success(`تم حفظ ${list.length} صورة`);
+    setItems([]);
+    setSaved(true);
   };
 
   return (
     <>
-      <PageHeader
-        title="رفع صورة قمر صناعي"
-        en="Upload Satellite Image"
-        description="ارفع ملف GeoTIFF يدوياً وتحقق من بياناته الوصفية قبل ربطه بالحادثة."
-      />
-
-      <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
+      <PageHeader title="رفع الصور" description="ارفع صورة جغرافية واحدة أو عدة صور معاً بصيغة GeoTIFF، ثم تحقق منها قبل الحفظ." />
+      <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
         <div className="space-y-6">
-          <Panel title="١. بيانات الصورة" en="Image details">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-sm font-medium">الحادثة المرتبطة <span className="ltr text-xs text-muted-foreground">Incident</span></label>
-                <select value={incidentId} onChange={(e) => setIncidentId(e.target.value)} className="field">
-                  {openIncidents.map((i) => (
-                    <option key={i.id} value={i.id}>
-                      {i.id} — {i.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">نوع الصورة <span className="ltr text-xs text-muted-foreground">Image type</span></label>
-                <select value={imageRole} onChange={(e) => setImageRole(e.target.value as ImageRole)} className="field">
-                  <option value="post-event">بعد الحدث · Post-event</option>
-                  <option value="pre-event">قبل الحدث · Pre-event</option>
-                  <option value="single">صورة واحدة · Single</option>
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">المستشعر (إن كان معروفاً) <span className="ltr text-xs text-muted-foreground">Sensor</span></label>
-                <select value={sensor} onChange={(e) => setSensor(e.target.value)} className="field">
-                  {SENSORS.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">تاريخ الالتقاط <span className="ltr text-xs text-muted-foreground">Acquisition date</span></label>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="field ltr" />
-                <p className="text-xs text-muted-foreground">أدخله فقط إذا لم يكن متوفراً في البيانات الوصفية.</p>
-              </div>
-            </div>
+          <Panel title="الحالة">
+            <select value={incidentId} onChange={(e) => { setIncidentId(e.target.value); setItems([]); }} className="field">
+              {incidents.map((i) => <option key={i.id} value={i.id}>{i.name} ({i.id})</option>)}
+            </select>
           </Panel>
-
-          <Panel title="٢. ملف GeoTIFF" en="File">
-            {!file ? (
-              <div
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setDrag(true);
-                }}
-                onDragLeave={() => setDrag(false)}
-                onDrop={onDrop}
-                className={cn(
-                  "flex flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-12 text-center transition-colors",
-                  drag ? "border-primary bg-primary-soft" : "border-input bg-muted/40",
-                )}
-              >
-                <div className="mb-3 grid h-12 w-12 place-items-center rounded-full bg-card text-primary shadow-card">
-                  <UploadCloud className="h-6 w-6" />
-                </div>
-                <div className="font-semibold">اسحب الملف وأفلته هنا</div>
-                <div className="ltr text-xs text-muted-foreground">Drag & drop a GeoTIFF file</div>
-                <div className="my-3 text-xs text-muted-foreground">أو</div>
-                <Button type="button" variant="outline" onClick={() => inputRef.current?.click()}>
-                  استعراض الملفات · Browse
-                </Button>
-                <div className="mt-4 text-xs text-muted-foreground">
-                  الصيغ المقبولة: <span className="ltr font-mono">.tif, .tiff</span>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-4 rounded-lg border bg-muted/40 p-4">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-card text-navy shadow-card">
-                  <FileImage className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="ltr truncate text-start font-mono text-sm font-medium" title={file.name}>{file.name}</div>
-                  <div className="ltr text-start text-xs text-muted-foreground">{formatSize(file.size)}</div>
-                </div>
-                <Button type="button" variant="ghost" size="icon" aria-label="إزالة الملف" onClick={() => { setFile(null); setResult(null); setState("idle"); }}>
-                  <X />
-                </Button>
-              </div>
-            )}
-            <input
-              ref={inputRef}
-              type="file"
-              accept=".tif,.tiff,image/tiff"
-              className="hidden"
-              onChange={(e) => pick(e.target.files?.[0])}
-              data-testid="geotiff-input"
-            />
-            <div className="mt-4 flex items-center gap-3">
-              <Button onClick={validate} disabled={!file || state === "validating"} variant="navy">
-                {state === "validating" ? <Loader2 className="animate-spin" /> : <ShieldCheck />}
-                التحقق من الصورة · Validate
-              </Button>
-              <span className="text-xs text-muted-foreground">لا يتم تنزيل الصور تلقائياً — الرفع يدوي فقط.</span>
-            </div>
-          </Panel>
-        </div>
-
-        <Panel title="نتائج التحقق" en="Validation results" className="self-start">
-          {state === "idle" && !result && (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              اختر ملفاً ثم اضغط «التحقق من الصورة» لعرض النتائج.
-            </div>
-          )}
-          {state === "validating" && (
-            <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> جارٍ قراءة البيانات الوصفية…
-            </div>
-          )}
-          {state === "done" && result && (
-            <div className="space-y-4">
-              <ul className="divide-y rounded-md border">
-                {result.checks.map((c) => (
-                  <li key={c.en} className="flex items-start gap-3 px-3 py-2.5 text-sm">
-                    {c.ok === true ? (
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-                    ) : c.ok === "warn" ? (
-                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-                    ) : (
-                      <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <div className="font-medium">
-                        {c.label} <span className="ltr text-[11px] font-normal text-muted-foreground">{c.en}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">{c.value}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-
-              {result.errors.map((e) => (
-                <Notice key={e} tone="danger" title="الصورة غير مدعومة · Unsupported" icon={<XCircle className="h-4 w-4" />}>{e}</Notice>
-              ))}
-              {result.warnings.map((w) => (
-                <Notice key={w} tone="warning" icon={<AlertTriangle className="h-4 w-4" />}>{w}</Notice>
-              ))}
-              {result.supported && result.warnings.length === 0 && (
-                <Notice tone="success" icon={<CheckCircle2 className="h-4 w-4" />}>الصورة صالحة للتحليل.</Notice>
-              )}
-
-              <Button onClick={save} disabled={!canSave} className="w-full" size="lg">
-                <Save /> حفظ الصورة في الحادثة
-              </Button>
-              {needsDate && <p className="text-center text-xs text-destructive">أدخل تاريخ الالتقاط للمتابعة.</p>}
-            </div>
-          )}
-          <div className="mt-5 flex gap-2 border-t pt-4 text-[11px] text-muted-foreground">
-            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            في هذا العرض التجريبي تتم محاكاة نتائج التحقق. في النظام الفعلي تُقرأ البيانات بواسطة Rasterio على الخادم.
+          <div
+            onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+            onDragLeave={() => setDrag(false)}
+            onDrop={onDrop}
+            className={cn("rounded-lg border-2 border-dashed bg-card p-10 text-center", drag && "border-primary bg-primary-soft")}
+          >
+            <UploadCloud className="mx-auto h-10 w-10 text-primary" />
+            <p className="mt-3 font-medium">اسحب الملفات وأفلتها هنا</p>
+            <p className="mt-1 text-sm text-muted-foreground">يمكن اختيار عدة ملفات GeoTIFF (.tif / .tiff) دفعة واحدة</p>
+            <Button className="mt-4" variant="outline" onClick={() => input.current?.click()}>استعراض الملفات</Button>
+            <input ref={input} type="file" multiple accept=".tif,.tiff" className="hidden" onChange={(e) => { add(e.target.files); e.target.value = ""; }} />
           </div>
-        </Panel>
+
+          {items.map((x) => (
+            <Panel key={x.key} title={<span className="ltr font-mono text-xs">{x.file.name}</span>} actions={<button aria-label="إزالة" onClick={() => setItems((l) => l.filter((y) => y.key !== x.key))} className="text-muted-foreground hover:text-destructive"><X className="h-4 w-4" /></button>}>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="text-sm"><div className="text-xs text-muted-foreground">الحجم</div><div className="ltr mt-2 text-start">{size(x.file.size)}</div></div>
+                <label className="space-y-1 text-sm"><span className="text-xs text-muted-foreground">نوع الصورة</span>
+                  <select className="field" value={x.sensor} onChange={(e) => upd(x.key, { sensor: e.target.value })}>{SENSORS.map((s) => <option key={s}>{s}</option>)}</select>
+                </label>
+                {inc?.type === "fire" && (
+                  <label className="space-y-1 text-sm"><span className="text-xs text-muted-foreground">دور الصورة</span>
+                    <select className="field" value={x.role} onChange={(e) => upd(x.key, { role: e.target.value as ImageRole })}>
+                      <option value="pre">قبل الحدث</option><option value="post">بعد الحدث</option><option value="later">صورة لاحقة</option>
+                    </select>
+                  </label>
+                )}
+                <label className="space-y-1 text-sm"><span className="text-xs text-muted-foreground">تاريخ الالتقاط {x.dateFromMeta ? "(من البيانات الوصفية)" : "(مطلوب)"}</span>
+                  <input type="date" className={cn("field", !x.date && "border-warning")} value={x.date} disabled={x.dateFromMeta} onChange={(e) => upd(x.key, { date: e.target.value })} />
+                </label>
+              </div>
+              {!x.date && <p className="mt-3 flex items-center gap-1.5 text-xs text-warning-foreground"><AlertTriangle className="h-3.5 w-3.5" /> تاريخ الالتقاط غير موجود في البيانات الوصفية – يرجى إدخاله</p>}
+              {x.result && (
+                <div className="mt-4 space-y-3 border-t pt-4">
+                  <div className="grid gap-2 sm:grid-cols-5">
+                    {x.result.checks.map((c) => (
+                      <div key={c.label} className="rounded-md border p-2 text-xs">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          {c.ok === true ? <CheckCircle2 className="h-3.5 w-3.5 text-success" /> : c.ok === "warn" ? <AlertTriangle className="h-3.5 w-3.5 text-warning" /> : <XCircle className="h-3.5 w-3.5 text-destructive" />}
+                          {c.label}
+                        </div>
+                        <div className="mt-1 font-medium">{c.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {x.result.warnings.map((w) => <Notice key={w} tone={x.result!.supported ? "warning" : "danger"}>{w}</Notice>)}
+                </div>
+              )}
+            </Panel>
+          ))}
+
+          {items.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <Button variant="navy" onClick={checkAll}><ShieldCheck /> التحقق من الصور</Button>
+              <Button disabled={!allChecked || saveable.length === 0} onClick={save}><Save /> حفظ الصور ({saveable.length})</Button>
+            </div>
+          )}
+          {saved && inc && (
+            <Notice tone="success" title="تم حفظ الصور">
+              <span className="flex flex-wrap gap-3">
+                <Link to="/incidents/$id" params={{ id: inc.id }} className="text-primary hover:underline">عرض الحالة</Link>
+                <Link to="/incidents/$id/analyze" params={{ id: inc.id }} className="text-primary hover:underline">بدء التحليل</Link>
+              </span>
+            </Notice>
+          )}
+        </div>
+        <div className="space-y-4">
+          <Notice tone="info" icon={<Info className="h-4 w-4" />} title="ملاحظات">
+            يجب أن يكون لكل صورة تاريخ التقاط. إذا أُضيفت صورة بتاريخ لاحق إلى حالة مغلقة تعود الحالة «نشطة» تلقائياً. لا يقوم النظام بتنزيل الصور آلياً.
+          </Notice>
+        </div>
       </div>
     </>
   );

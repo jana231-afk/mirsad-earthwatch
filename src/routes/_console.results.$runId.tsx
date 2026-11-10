@@ -1,115 +1,75 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ClipboardCheck, FileText, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  PageHeader,
-  Panel,
-  RoleGate,
-  EmptyState,
-  RunStatusBadge,
-  ExperimentalBadge,
-  TypeBadge,
-  Notice,
-} from "@/components/mirsad/bits";
-import { BinaryMask, ImageThumb, MapLegend, MapViewer } from "@/components/mirsad/MapViewer";
+import { PageHeader, Panel, RoleGate, EmptyState, RunStatusBadge, ExperimentalBadge, TypeBadge, Notice } from "@/components/mirsad/bits";
+import { MapViewer, ImageThumb } from "@/components/mirsad/MapViewer";
 import { AreaStats, RunInfo, AREA_DISCLAIMER } from "@/components/mirsad/RunSummary";
+import { ComparisonChart, ComparisonSequence, ComparisonTable, comparisonSummary } from "@/components/mirsad/DailyComparison";
+import { DayTabs } from "@/components/mirsad/DayTabs";
 import { useDemo } from "@/lib/demo-store";
 
 export const Route = createFileRoute("/_console/results/$runId")({
+  validateSearch: (s: Record<string, unknown>): { day?: number | undefined } => ({
+    day: Number.isInteger(Number(s["day"])) && s["day"] !== undefined ? Number(s["day"]) : undefined,
+  }),
   head: () => ({
     meta: [
-      { title: "نتائج التحليل · MIRSAD" },
-      { name: "description", content: "Segmentation mask overlay, affected area in km², percentage and model information for an analysis run." },
-      { property: "og:title", content: "Analysis Results · MIRSAD" },
-      { property: "og:description", content: "Map overlay and area statistics for a segmentation run." },
+      { title: "نتائج التحليل · مِرصاد" },
+      { name: "description", content: "خريطة نتيجة التحليل والمساحة المتأثرة والمقارنة بين الأيام." },
+      { property: "og:title", content: "نتائج التحليل · مِرصاد" },
+      { property: "og:description", content: "قناع التقسيم والإحصاءات والمقارنة اليومية." },
     ],
   }),
-  component: () => (
-    <RoleGate allow={["analyst"]}>
-      <ResultsPage />
-    </RoleGate>
-  ),
+  component: () => (<RoleGate allow={["analyst"]}><Results /></RoleGate>),
 });
 
-function ResultsPage() {
+function Results() {
   const { runId } = Route.useParams();
+  const { day } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const { runs, incidents, images } = useDemo();
   const run = runs.find((r) => r.id === runId);
-  if (!run) return <EmptyState title="التحليل غير موجود" />;
-  const inc = incidents.find((i) => i.id === run.incidentId)!;
-  const runImages = images.filter((m) => run.imageIds.includes(m.id));
+  const inc = run && incidents.find((i) => i.id === run.incidentId);
+  if (!run || !inc) return <EmptyState title="التحليل غير موجود" />;
+  const idx = Math.min(Math.max(day ?? run.days.length - 1, 0), run.days.length - 1);
+  const d = run.days[idx]!;
+  const setDay = (i: number) => navigate({ search: { day: i }, replace: true });
+  const preImg = images.find((m) => run.imageIds.includes(m.id) && m.imageRole === "pre");
 
   return (
     <>
       <PageHeader
-        crumbs={[
-          { label: "الحوادث", to: "/incidents" },
-          { label: inc.name, to: "/incidents/$id", params: { id: inc.id } },
-          { label: `نتائج ${run.id}` },
-        ]}
         title="نتائج التحليل"
-        en="Analysis Results"
-        description={
-          <span className="flex flex-wrap items-center gap-2">
-            <span className="ltr font-mono text-xs">{run.id}</span>
-            <TypeBadge type={inc.type} />
-            <RunStatusBadge status={run.status} />
-            {run.experimental && <ExperimentalBadge />}
-          </span>
-        }
-        actions={
-          <>
-            <Button asChild variant="outline">
-              <Link to="/review/$runId" params={{ runId: run.id }}>
-                <ClipboardCheck /> مراجعة النتيجة
-              </Link>
-            </Button>
-            <Button asChild disabled={run.status !== "reviewed"}>
-              <Link to="/reports/$runId" params={{ runId: run.id }}>
-                <FileText /> معاينة التقرير
-              </Link>
-            </Button>
-          </>
-        }
+        crumbs={[{ label: "سجل التحليلات", to: "/history" }, { label: inc.name, to: "/incidents/$id", params: { id: inc.id } }, { label: run.id }]}
+        description={<span className="flex flex-wrap items-center gap-2">{inc.name} <TypeBadge type={inc.type} /> <RunStatusBadge status={run.status} /> {run.experimental && <ExperimentalBadge />}</span>}
+        actions={run.status === "reviewed"
+          ? <Button asChild><Link to="/reports" search={{ incident: inc.id }}><FileText /> إنشاء تقرير</Link></Button>
+          : <Button asChild variant="navy"><Link to="/review/$runId" params={{ runId }}><ClipboardCheck /> مراجعة النتيجة</Link></Button>}
       />
-
+      <div className="mb-4"><DayTabs days={run.days} value={idx} onChange={setDay} /></div>
       <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
         <div className="space-y-6">
-          <MapViewer
-            base={run.layers.base}
-            mask={run.layers.mask}
-            nodata={run.layers.nodata}
-            kind={inc.type}
-            caption="اسحب للتحريك بعد التكبير"
-          />
-          <div className="grid gap-4 md:grid-cols-3">
-            {run.layers.pre && <ImageThumb src={run.layers.pre} label="قبل الحدث · Pre-event" />}
-            <ImageThumb src={run.layers.base} label={run.layers.pre ? "بعد الحدث · Post-event" : "الصورة الأصلية · Original"} />
-            <BinaryMask mask={run.layers.mask} nodata={run.layers.nodata} label="قناع التجزئة · Mask" />
-          </div>
+          <MapViewer key={d.imageId} {...d.layers} kind={inc.type} />
+          {preImg && <Panel title="صورة قبل الحدث (مرجع)"><div className="max-w-sm"><ImageThumb src={preImg.preview} label={preImg.acquisitionDate} /></div></Panel>}
         </div>
-
         <div className="space-y-6">
-          <Panel title="إحصاءات المساحة" en="Area statistics">
-            <AreaStats run={run} kind={inc.type} />
-            <div className="mt-4 flex gap-2 text-xs text-muted-foreground">
-              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              {AREA_DISCLAIMER}
-            </div>
-          </Panel>
-          <Panel title="مفتاح الخريطة" en="Legend">
-            <MapLegend kind={inc.type} hasNodata={!!run.layers.nodata} className="text-sm" />
-          </Panel>
-          <Panel title="معلومات التحليل" en="Analysis information">
-            <RunInfo run={run} images={runImages} />
-          </Panel>
-          {run.status !== "reviewed" && (
-            <Notice tone="warning" title="لم تُعتمد بعد">
-              هذه النتيجة غير مرئية للمستجيبين الميدانيين حتى يتم وضع علامة «تمت المراجعة».
-            </Notice>
-          )}
+          <Panel title="الإحصاءات"><AreaStats day={d} kind={inc.type} /></Panel>
+          <Panel title="معلومات التحليل"><RunInfo run={run} images={images} day={d} /></Panel>
         </div>
       </div>
+      {run.days.length > 1 && (
+        <Panel title="المقارنة بين الأيام" className="mt-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <ComparisonChart days={run.days} kind={inc.type} activeIndex={idx} onSelect={setDay} />
+            <div className="space-y-4">
+              <ComparisonSequence days={run.days} />
+              <p className="text-sm text-muted-foreground">{comparisonSummary(run.days, inc.type)}</p>
+              <ComparisonTable days={run.days} compact />
+            </div>
+          </div>
+        </Panel>
+      )}
+      <div className="mt-6"><Notice icon={<Info className="h-4 w-4" />}>{AREA_DISCLAIMER}</Notice></div>
     </>
   );
 }
