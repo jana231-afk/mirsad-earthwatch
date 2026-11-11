@@ -1,107 +1,78 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Download, FileText, Info, Lock } from "lucide-react";
+import { useState } from "react";
+import { Download, FileText, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  PageHeader,
-  Panel,
-  RoleGate,
-  EmptyState,
-  TypeBadge,
-  IncidentStatusBadge,
-  ExperimentalBadge,
-  InfoRow,
-  Notice,
-} from "@/components/mirsad/bits";
+import { PageHeader, Panel, RoleGate, EmptyState, TypeBadge, AutoStatusBadge, DateRange, InfoRow, ExperimentalBadge, Notice } from "@/components/mirsad/bits";
 import { MapViewer } from "@/components/mirsad/MapViewer";
 import { AreaStats, AREA_DISCLAIMER } from "@/components/mirsad/RunSummary";
+import { ComparisonSequence, ComparisonTable, comparisonSummary } from "@/components/mirsad/DailyComparison";
+import { DayTabs } from "@/components/mirsad/DayTabs";
 import { latestReviewedRun, useDemo } from "@/lib/demo-store";
-import { TYPE_LABELS } from "@/lib/demo-data";
+import { REPORT_TYPE_LABELS, formatDate } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_console/field/$id")({
   head: () => ({
     meta: [
-      { title: "تفاصيل الحادثة (قراءة فقط) · MIRSAD" },
-      { name: "description", content: "Read-only incident details, reviewed segmentation map and affected area statistics for field responders." },
-      { property: "og:title", content: "Incident (Read-only) · MIRSAD" },
-      { property: "og:description", content: "Reviewed analysis map and statistics for field responders." },
+      { title: "تفاصيل الحالة للمستجيب · مِرصاد" },
+      { name: "description", content: "عرض للقراءة فقط لآخر نتيجة مراجَعة وخريطتها وإحصاءاتها." },
+      { property: "og:title", content: "تفاصيل الحالة · مِرصاد" },
+      { property: "og:description", content: "الخريطة والمساحة المتأثرة والمقارنة اليومية." },
     ],
   }),
-  component: () => (
-    <RoleGate allow={["responder"]}>
-      <FieldDetail />
-    </RoleGate>
-  ),
+  component: () => (<RoleGate allow={["responder"]}><FieldDetail /></RoleGate>),
 });
 
 function FieldDetail() {
   const { id } = Route.useParams();
-  const { incidents, runs, images } = useDemo();
+  const { incidents, runs, reports } = useDemo();
   const inc = incidents.find((i) => i.id === id && i.sharedWithResponders);
-  if (!inc) return <EmptyState title="الحادثة غير متاحة">هذه الحادثة غير مصرح بها لحسابك.</EmptyState>;
-  const run = latestReviewedRun(runs, id);
-  const post = run && images.find((m) => run.imageIds.includes(m.id) && m.imageRole !== "pre-event");
-
+  const run = inc && latestReviewedRun(runs, id);
+  const [idx, setIdx] = useState(run ? run.days.length - 1 : 0);
+  if (!inc) return <EmptyState title="الحالة غير متاحة">هذه الحالة غير مصرح بها لحسابك.</EmptyState>;
+  const reps = reports.filter((r) => r.incidentId === id);
+  const d = run?.days[Math.min(idx, run.days.length - 1)];
   return (
     <>
-      <PageHeader
-        crumbs={[{ label: "الحوادث المصرح بها", to: "/field" }, { label: inc.name }]}
-        title={inc.name}
-        en={inc.nameEn || undefined}
-        description={
-          <span className="flex flex-wrap items-center gap-2">
-            <TypeBadge type={inc.type} />
-            <IncidentStatusBadge status={inc.status} />
-            <span className="inline-flex items-center gap-1 text-xs"><Lock className="h-3 w-3" /> قراءة فقط</span>
-          </span>
-        }
-        actions={
-          run && (
+      <PageHeader title={inc.name} crumbs={[{ label: "الحالات المصرح بها", to: "/field" }, { label: inc.name }]}
+        description={<span className="flex flex-wrap items-center gap-2"><TypeBadge type={inc.type} /><AutoStatusBadge incident={inc} /></span>} />
+      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+        <div className="space-y-6">
+          {!run || !d ? <EmptyState title="لا توجد نتيجة مراجَعة بعد" /> : (
             <>
-              <Button asChild variant="outline">
-                <Link to="/reports/$runId" params={{ runId: run.id }}><FileText /> عرض التقرير</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/reports/$runId" params={{ runId: run.id }} search={{ download: true }}><Download /> تنزيل PDF</Link>
-              </Button>
+              <DayTabs days={run.days} value={idx} onChange={setIdx} />
+              <MapViewer key={d.imageId} {...d.layers} kind={inc.type} />
+              <Panel title={<span className="flex items-center gap-2">إحصاءات المساحة – {formatDate(d.date)} {run.experimental && <ExperimentalBadge />}</span>}><AreaStats day={d} kind={inc.type} /></Panel>
+              {run.days.length > 1 && (
+                <Panel title="ملخص المقارنة اليومية">
+                  <div className="space-y-3"><ComparisonSequence days={run.days} /><p className="text-sm text-muted-foreground">{comparisonSummary(run.days, inc.type)}</p><ComparisonTable days={run.days} compact /></div>
+                </Panel>
+              )}
+              <Notice icon={<Info className="h-4 w-4" />}>{AREA_DISCLAIMER}</Notice>
             </>
-          )
-        }
-      />
-
-      {!run ? (
-        <EmptyState title="لا توجد نتيجة معتمدة لهذه الحادثة بعد">ستظهر النتيجة هنا بعد مراجعتها من المحلل.</EmptyState>
-      ) : (
-        <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
-          <div>
-            <div className="mb-2 flex items-center justify-between text-sm">
-              <span className="font-semibold">خريطة النتيجة المعتمدة <span className="ltr text-xs font-normal text-muted-foreground">Reviewed segmentation overlay</span></span>
-              {run.experimental && <ExperimentalBadge />}
-            </div>
-            <MapViewer base={run.layers.base} mask={run.layers.mask} nodata={run.layers.nodata} kind={inc.type} />
-          </div>
-          <div className="space-y-6">
-            <Panel title="إحصاءات المساحة" en="Affected area statistics">
-              <AreaStats run={run} kind={inc.type} />
-              <div className="mt-4 flex gap-2 text-xs text-muted-foreground">
-                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {AREA_DISCLAIMER}
-              </div>
-            </Panel>
-            <Panel title="بيانات الحادثة والتحليل" en="Incident & analysis">
-              <dl>
-                <InfoRow label="رقم الحادثة" value={inc.id} mono />
-                <InfoRow label="النوع" value={TYPE_LABELS[inc.type].ar} />
-                <InfoRow label="الموقع" value={inc.location} />
-                <InfoRow label="تاريخ الحادثة" value={inc.date} mono />
-                {post && <InfoRow label="تاريخ التقاط الصورة" value={post.acquisitionDate} mono />}
-                <InfoRow label="النموذج" value={`${run.model} ${run.modelVersion}`} mono />
-                <InfoRow label="تاريخ المراجعة" value={run.reviewedAt} mono />
-              </dl>
-              {inc.description && <p className="mt-3 text-sm text-muted-foreground">{inc.description}</p>}
-            </Panel>
-            <Notice tone="success">هذه النتيجة تمت مراجعتها واعتمادها من محلل نظم المعلومات الجغرافية.</Notice>
-          </div>
+          )}
         </div>
-      )}
+        <div className="space-y-6">
+          <Panel title="معلومات الحالة"><dl>
+            <InfoRow label="الموقع" value={inc.location} />
+            <InfoRow label="الفترة (من – إلى)" value={<DateRange from={inc.startDate} to={inc.endDate} />} />
+            {run && <InfoRow label="المراجع" value={run.reviewer ?? "—"} />}
+            {run && <InfoRow label="النموذج" value={run.model} />}
+          </dl></Panel>
+          <Panel title="التقارير">
+            {reps.length === 0 ? <p className="text-sm text-muted-foreground">لا توجد تقارير.</p> : (
+              <ul className="space-y-2">{reps.map((r) => (
+                <li key={r.id} className="rounded-md border p-3 text-sm">
+                  <div className="font-medium">{REPORT_TYPE_LABELS[r.type]}</div>
+                  <div className="text-xs text-muted-foreground"><span className="ltr">{r.id}</span> · {formatDate(r.createdAt)}</div>
+                  <div className="mt-2 flex gap-1.5">
+                    <Button asChild size="sm" variant="outline"><Link to="/reports/$reportId" params={{ reportId: r.id }}><FileText /> عرض</Link></Button>
+                    <Button asChild size="sm" variant="soft"><Link to="/reports/$reportId" params={{ reportId: r.id }} search={{ download: true }}><Download /> تحميل PDF</Link></Button>
+                  </div>
+                </li>))}</ul>
+            )}
+          </Panel>
+        </div>
+      </div>
     </>
   );
 }

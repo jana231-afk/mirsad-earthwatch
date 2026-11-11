@@ -1,77 +1,52 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, Lock } from "lucide-react";
+import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageHeader, RoleGate, TypeBadge, IncidentStatusBadge, Notice, EmptyState } from "@/components/mirsad/bits";
-import { ImageThumb } from "@/components/mirsad/MapViewer";
+import { PageHeader, Panel, RoleGate, TypeBadge, AutoStatusBadge, DateRange, EmptyState, th, td } from "@/components/mirsad/bits";
 import { latestReviewedRun, useDemo } from "@/lib/demo-store";
-import { formatKm2 } from "@/lib/demo-data";
+import { formatKm2, formatPct, latestDay } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_console/field/")({
   head: () => ({
     meta: [
-      { title: "الحوادث المصرح بها · MIRSAD" },
-      { name: "description", content: "Read-only list of incidents authorized for field responders, with reviewed analysis results." },
-      { property: "og:title", content: "Authorized Incidents · MIRSAD" },
-      { property: "og:description", content: "Field responder view of reviewed disaster assessments." },
+      { title: "الحالات المصرح بها · مِرصاد" },
+      { name: "description", content: "قائمة الحالات المتاحة للمستجيب الميداني مع آخر نتيجة مراجَعة." },
+      { property: "og:title", content: "الحالات المصرح بها · مِرصاد" },
+      { property: "og:description", content: "عرض للقراءة فقط للنتائج المراجَعة." },
     ],
   }),
-  component: () => (
-    <RoleGate allow={["responder"]}>
-      <FieldList />
-    </RoleGate>
-  ),
+  component: () => (<RoleGate allow={["responder"]}><FieldList /></RoleGate>),
 });
 
 function FieldList() {
   const { incidents, runs } = useDemo();
-  const list = incidents.filter((i) => i.sharedWithResponders);
+  const rows = incidents.filter((i) => i.sharedWithResponders);
   return (
     <>
-      <PageHeader title="الحوادث المصرح بها" en="Authorized Incidents" description="تعرض هذه الصفحة النتائج التي راجعها واعتمدها محللو نظم المعلومات الجغرافية فقط." />
-      <div className="mb-6">
-        <Notice tone="info" icon={<Lock className="h-4 w-4" />}>
-          وضع القراءة فقط · Read-only — لا يمكن رفع الصور أو تشغيل النماذج أو تعديل النتائج من هذا الحساب.
-        </Notice>
-      </div>
-      {list.length === 0 ? (
-        <EmptyState title="لا توجد حوادث مصرح بها حالياً" />
-      ) : (
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {list.map((i) => {
-            const run = latestReviewedRun(runs, i.id);
-            return (
-              <div key={i.id} className="flex flex-col overflow-hidden rounded-lg border bg-card shadow-card">
-                {run ? (
-                  <ImageThumb src={run.layers.base} className="rounded-none border-0 border-b" />
-                ) : (
-                  <div className="grid aspect-[4/3] place-items-center border-b bg-muted text-sm text-muted-foreground">لا توجد نتيجة معتمدة</div>
-                )}
-                <div className="flex flex-1 flex-col gap-3 p-4">
-                  <div>
-                    <div className="font-semibold">{i.name}</div>
-                    <div className="text-xs text-muted-foreground">{i.location} · <span className="ltr font-mono">{i.date}</span></div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <TypeBadge type={i.type} />
-                    <IncidentStatusBadge status={i.status} />
-                  </div>
-                  {run && (
-                    <div className="rounded-md bg-muted/50 px-3 py-2 text-xs">
-                      <span className="text-muted-foreground">المساحة المتأثرة: </span>
-                      <span className="ltr font-mono font-semibold">{formatKm2(run.affectedKm2)} km² · {run.affectedPct.toFixed(2)}%</span>
-                    </div>
-                  )}
-                  <Button asChild variant="outline" className="mt-auto">
-                    <Link to="/field/$id" params={{ id: i.id }}>
-                      <Eye /> عرض التفاصيل
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <PageHeader title="الحالات المصرح بها" description="عرض للقراءة فقط. تظهر هنا النتائج المراجَعة فقط." />
+      <Panel bodyClassName="p-0">
+        {rows.length === 0 ? <div className="p-5"><EmptyState title="لا توجد حالات مصرح بها" /></div> : (
+          <div className="overflow-x-auto"><table className="w-full">
+            <thead className="border-b bg-muted/50"><tr>{["الحالة", "نوع الكارثة", "الموقع", "الفترة", "الحالة", "آخر نتيجة مراجَعة", ""].map((h, k) => <th key={k} className={th}>{h}</th>)}</tr></thead>
+            <tbody className="divide-y">
+              {rows.map((i) => {
+                const r = latestReviewedRun(runs, i.id);
+                const d = r && latestDay(r);
+                return (
+                  <tr key={i.id} className="hover:bg-muted/40">
+                    <td className={`${td} font-medium`}>{i.name}</td>
+                    <td className={td}><TypeBadge type={i.type} /></td>
+                    <td className={`${td} text-muted-foreground`}>{i.location}</td>
+                    <td className={td}><DateRange from={i.startDate} to={i.endDate} /></td>
+                    <td className={td}><AutoStatusBadge incident={i} /></td>
+                    <td className={td}>{d ? <span><span className="ltr font-mono">{formatPct(d.affectedPct)}</span> · <span className="ltr font-mono">{formatKm2(d.affectedKm2)}</span> km²</span> : <span className="text-muted-foreground">لا توجد</span>}</td>
+                    <td className={`${td} text-end`}><Button asChild size="sm" variant="outline"><Link to="/field/$id" params={{ id: i.id }}><Eye /> عرض</Link></Button></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table></div>
+        )}
+      </Panel>
     </>
   );
 }

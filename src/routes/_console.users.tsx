@@ -11,10 +11,10 @@ import { ROLE_LABELS, type Role } from "@/lib/demo-data";
 export const Route = createFileRoute("/_console/users")({
   head: () => ({
     meta: [
-      { title: "إدارة المستخدمين · MIRSAD" },
-      { name: "description", content: "System administrator page to manage MIRSAD user accounts and roles." },
-      { property: "og:title", content: "User Management · MIRSAD" },
-      { property: "og:description", content: "Manage accounts for administrators, GIS analysts and field responders." },
+      { title: "إدارة المستخدمين · مِرصاد" },
+      { name: "description", content: "صفحة مدير النظام لإدارة حسابات المستخدمين وأدوارهم." },
+      { property: "og:title", content: "إدارة المستخدمين · مِرصاد" },
+      { property: "og:description", content: "إدارة حسابات المديرين والمحللين والمستجيبين الميدانيين." },
     ],
   }),
   component: () => (
@@ -63,7 +63,7 @@ function UsersPage() {
 
   return (
     <>
-      <PageHeader title="إدارة المستخدمين" en="User Management" description="إدارة حسابات المستخدمين وتعيين الأدوار الثلاثة في النظام." />
+      <PageHeader title="إدارة المستخدمين" description="إدارة حسابات المستخدمين وتعيين الأدوار الثلاثة في النظام." />
 
       <div className="mb-6 grid gap-4 md:grid-cols-3">
         {(Object.keys(ROLE_DESC) as Role[]).map((r) => {
@@ -72,10 +72,9 @@ function UsersPage() {
             <div key={r} className="rounded-lg border bg-card p-4 shadow-card">
               <div className="flex items-center gap-2">
                 <Icon className="h-4 w-4 text-primary" />
-                <span className="font-semibold">{ROLE_LABELS[r].ar}</span>
+                <span className="font-semibold">{ROLE_LABELS[r]}</span>
                 <span className="ltr ms-auto font-mono text-sm text-muted-foreground">{users.filter((u) => u.role === r).length}</span>
               </div>
-              <div className="ltr text-start text-[11px] text-muted-foreground">{ROLE_LABELS[r].en}</div>
               <p className="mt-2 text-xs text-muted-foreground">{ROLE_DESC[r].perms}</p>
             </div>
           );
@@ -83,7 +82,7 @@ function UsersPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
-        <Panel title="الحسابات" en="Accounts" bodyClassName="p-0">
+        <Panel title="الحسابات" bodyClassName="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="border-b bg-muted/50">
@@ -112,13 +111,13 @@ function UsersPage() {
                         aria-label={`دور ${u.name}`}
                       >
                         {(Object.keys(ROLE_LABELS) as Role[]).map((r) => (
-                          <option key={r} value={r}>{ROLE_LABELS[r].ar} · {ROLE_LABELS[r].en}</option>
+                          <option key={r} value={r}>{ROLE_LABELS[r]}</option>
                         ))}
                       </select>
                     </td>
                     <td className={`${td} ltr text-start font-mono text-[13px]`}>{u.lastLogin}</td>
                     <td className={td}>
-                      <Badge variant={u.active ? "reviewed" : "closed"}>{u.active ? "نشط · Active" : "معطّل · Disabled"}</Badge>
+                      <Badge variant={u.active ? "reviewed" : "closed"}>{u.active ? "نشط" : "معطّل"}</Badge>
                     </td>
                     <td className={`${td} text-end`}>
                       <Button
@@ -136,7 +135,7 @@ function UsersPage() {
           </div>
         </Panel>
 
-        <Panel title="إضافة مستخدم" en="Add user" className="self-start">
+        <Panel title="إضافة مستخدم" className="self-start">
           <form onSubmit={add} className="space-y-4" noValidate>
             <div className="space-y-1.5">
               <label className="text-sm font-medium">الاسم الكامل</label>
@@ -150,7 +149,7 @@ function UsersPage() {
               <label className="text-sm font-medium">الدور</label>
               <select value={role} onChange={(e) => setRole(e.target.value as Role)} className="field">
                 {(Object.keys(ROLE_LABELS) as Role[]).map((r) => (
-                  <option key={r} value={r}>{ROLE_LABELS[r].ar}</option>
+                  <option key={r} value={r}>{ROLE_LABELS[r]}</option>
                 ))}
               </select>
             </div>
