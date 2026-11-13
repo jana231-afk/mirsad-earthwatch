@@ -79,7 +79,7 @@ function UploadPage() {
       ...prev,
       ...Array.from(files).map((f, i) => {
         const d = dateFromName(f.name);
-        return { key: `${f.name}-${Date.now()}-${i}`, file: f, sensor: "غير معروف", role: (inc?.type === "fire" ? "post" : "event") as ImageRole, date: d, dateFromMeta: !!d };
+        return { key: `${f.name}-${Date.now()}-${i}`, file: f, sensor: "غير معروف", role: (inc?.type === "fire" ? "post" : "event") as ImageRole, date: d, dateFromMeta: false };
       }),
     ]);
   };
@@ -94,17 +94,19 @@ function UploadPage() {
   const saveable = items.filter((x) => x.result?.supported && x.date);
 
   const save = () => {
-    if (!inc) return;
+    if (!inc || !allChecked || !saveable.length) return;
     let pool: { id: string }[] = images;
-    const list: GeoImage[] = saveable.map((x) => {
+    const list: GeoImage[] = saveable.flatMap((x) => {
+      const result = x.result;
+      if (!result?.supported || !x.date) return [];
       const id = nextId("IMG", pool);
       pool = [...pool, { id }];
-      return {
+      return [{
         id, incidentId: inc.id, fileName: x.file.name, sizeMB: +(x.file.size / 1048576).toFixed(1), sensor: x.sensor,
         imageRole: inc.type === "fire" ? x.role : "event", acquisitionDate: x.date, acquisitionDateSource: x.dateFromMeta ? "metadata" : "manual",
         crs: "EPSG:32637", width: 1280, height: 960, bands: x.sensor === "رادارية" ? 2 : 4, resolution: "10 م", nodata: "0",
-        status: x.result!.warnings.length ? "warning" : "valid", warnings: x.result!.warnings, uploadedAt: todayISO(), preview: demoPreview(inc.type, x.role),
-      };
+        status: result.warnings.length ? "warning" : "valid", warnings: result.warnings, uploadedAt: todayISO(), preview: demoPreview(inc.type, x.role),
+      }];
     });
     demoActions.addImages(list);
     toast.success(`تم حفظ ${list.length} صورة`);
@@ -136,7 +138,7 @@ function UploadPage() {
           </div>
 
           {items.map((x) => (
-            <Panel key={x.key} title={<span className="ltr font-mono text-xs">{x.file.name}</span>} actions={<button aria-label="إزالة" onClick={() => setItems((l) => l.filter((y) => y.key !== x.key))} className="text-muted-foreground hover:text-destructive"><X className="h-4 w-4" /></button>}>
+            <Panel key={x.key} title={<span className="ltr break-all font-mono text-xs">{x.file.name}</span>} actions={<Button size="icon" variant="ghost" aria-label="إزالة" onClick={() => setItems((l) => l.filter((y) => y.key !== x.key))}><X className="h-4 w-4" /></Button>}>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="text-sm"><div className="text-xs text-muted-foreground">الحجم</div><div className="ltr mt-2 text-start">{size(x.file.size)}</div></div>
                 <label className="space-y-1 text-sm"><span className="text-xs text-muted-foreground">نوع الصورة</span>
@@ -167,7 +169,7 @@ function UploadPage() {
                       </div>
                     ))}
                   </div>
-                  {x.result.warnings.map((w) => <Notice key={w} tone={x.result!.supported ? "warning" : "danger"}>{w}</Notice>)}
+                  {x.result.warnings.map((w) => <Notice key={w} tone={x.result?.supported ? "warning" : "danger"}>{w}</Notice>)}
                 </div>
               )}
             </Panel>
@@ -192,6 +194,7 @@ function UploadPage() {
           <Notice tone="info" icon={<Info className="h-4 w-4" />} title="ملاحظات">
             يجب أن يكون لكل صورة تاريخ التقاط. إذا أُضيفت صورة بتاريخ لاحق إلى حالة مغلقة تعود الحالة «نشطة» تلقائياً. لا يقوم النظام بتنزيل الصور آلياً.
           </Notice>
+          <Notice tone="warning" title="بيانات تجريبية">نتائج التحقق والخريطة تمثيلية، وليست قراءة فعلية للملف. التاريخ المقترح من اسم الملف قابل للتعديل.</Notice>
         </div>
       </div>
     </>

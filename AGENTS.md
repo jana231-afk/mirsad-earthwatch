@@ -36,3 +36,4 @@ use the editor.
 - The UI is Arabic RTL (`dir="rtl"` on `<html>`); wrap Latin IDs, file names, numbers and units in the `ltr` utility so they render in the right order.
 - Public site pages use `SiteLayout` (src/components/site); Leaflet loads only via React.lazy behind ClientOnly, because it touches window at import.
 - Incident status is derived by `incidentStatus()` in demo-data, never stored, so it always follows the automatic date/image rule.
+- Keep demo report visibility and analysis-input checks in `src/lib/demo-rules.ts`, reused across screens, so read-only access and date ordering cannot diverge.

@@ -9,6 +9,7 @@ import { ComparisonSequence, ComparisonTable, comparisonSummary } from "@/compon
 import { DayTabs } from "@/components/mirsad/DayTabs";
 import { latestReviewedRun, useDemo } from "@/lib/demo-store";
 import { REPORT_TYPE_LABELS, formatDate } from "@/lib/demo-data";
+import { canViewReport } from "@/lib/demo-rules";
 
 export const Route = createFileRoute("/_console/field/$id")({
   head: () => ({
@@ -29,7 +30,7 @@ function FieldDetail() {
   const run = inc && latestReviewedRun(runs, id);
   const [idx, setIdx] = useState(run ? run.days.length - 1 : 0);
   if (!inc) return <EmptyState title="الحالة غير متاحة">هذه الحالة غير مصرح بها لحسابك.</EmptyState>;
-  const reps = reports.filter((r) => r.incidentId === id);
+  const reps = reports.filter((r) => r.incidentId === id && canViewReport("responder", r, incidents, runs));
   const d = run?.days[Math.min(idx, run.days.length - 1)];
   return (
     <>

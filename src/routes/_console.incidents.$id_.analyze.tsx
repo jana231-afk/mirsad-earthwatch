@@ -9,6 +9,7 @@ import { BinaryMask } from "@/components/mirsad/MapViewer";
 import { demoActions, incidentImages, nextId, nowStamp, useDemo } from "@/lib/demo-store";
 import { FIRE_MODEL, FLOOD_MODEL, IMAGE_ROLE_LABELS, formatDate, formatPct, simulateDays, type DayResult, type GeoImage } from "@/lib/demo-data";
 import { cn } from "@/lib/utils";
+import { canAnalyzeImages } from "@/lib/demo-rules";
 
 export const Route = createFileRoute("/_console/incidents/$id_/analyze")({
   head: () => ({
@@ -49,9 +50,9 @@ function AnalyzePage() {
   const steps = isFire ? toAnalyse.filter((m) => m.id !== pre).length : toAnalyse.length;
 
   useEffect(() => {
-    if (phase !== "running") return;
+    if (phase !== "running" || !inc) return;
     if (progress >= steps) {
-      const days = simulateDays(inc!.type, toAnalyse);
+      const days = simulateDays(inc.type, toAnalyse.map((image) => isFire ? { ...image, imageRole: image.id === pre ? "pre" : image.id === post ? "post" : "later" } : image));
       const runId = nextId("RUN", runs);
       demoActions.addRun({
         id: runId,
@@ -78,8 +79,9 @@ function AnalyzePage() {
 
   if (!inc) return <EmptyState title="الحالة غير موجودة" />;
 
-  const canRun = isFire ? !!pre && !!post && pre !== post : selected.length > 0;
+  const canRun = canAnalyzeImages(inc.type, toAnalyse, pre, post);
   const start = () => {
+    if (!canRun) return;
     setProgress(0);
     setResult(null);
     setPhase("running");
@@ -107,11 +109,11 @@ function AnalyzePage() {
           <Panel title={isFire ? "اختيار الصور (قبل الحدث وبعده)" : "اختيار الصور (صورة أو أكثر، مرتبة حسب التاريخ)"}>
             {isFire ? (
               <div className="space-y-5">
-                <ImagePick label="صورة قبل الحدث (مطلوبة)" imgs={imgs} value={pre} onChange={setPre} disabled={phase === "running"} />
-                <ImagePick label="صورة بعد الحدث (مطلوبة)" imgs={imgs.filter((m) => m.id !== pre)} value={post} onChange={setPost} disabled={phase === "running"} />
+                <ImagePick label="صورة قبل الحدث (مطلوبة)" imgs={imgs.filter((m) => m.imageRole === "pre")} value={pre} onChange={setPre} disabled={phase === "running"} />
+                <ImagePick label="صورة بعد الحدث (مطلوبة)" imgs={imgs.filter((m) => m.imageRole === "post")} value={post} onChange={setPost} disabled={phase === "running"} />
                 <div>
                   <div className="mb-2 text-sm font-medium">صور لاحقة إضافية (اختياري)</div>
-                  <ImageChecklist imgs={imgs.filter((m) => m.id !== pre && m.id !== post)} selected={later} onToggle={(v) => setLater(toggle(later, v))} disabled={phase === "running"} />
+                  <ImageChecklist imgs={imgs.filter((m) => m.imageRole === "later")} selected={later} onToggle={(v) => setLater(toggle(later, v))} disabled={phase === "running"} />
                 </div>
               </div>
             ) : (
@@ -167,7 +169,7 @@ function AnalyzePage() {
             <Button className="mt-5 w-full" size="lg" disabled={!canRun || phase === "running"} onClick={start}>
               {phase === "running" ? <Loader2 className="animate-spin" /> : <Play className="rtl:rotate-180" />} تشغيل التحليل
             </Button>
-            {!canRun && <p className="mt-2 text-xs text-muted-foreground">{isFire ? "اختر صورة قبل الحدث وصورة بعده." : "اختر صورة واحدة على الأقل."}</p>}
+            {!canRun && <p className="mt-2 text-xs text-muted-foreground">{isFire ? "اختر صورة قبل الحدث ثم صورة بتاريخ أحدث بعده، والصور اللاحقة بعد تاريخها." : "اختر صورة صالحة واحدة على الأقل."}</p>}
           </Panel>
           <Notice tone="info" icon={<Info className="h-4 w-4" />}>
             {isFire

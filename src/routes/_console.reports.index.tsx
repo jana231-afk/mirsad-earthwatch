@@ -8,6 +8,7 @@ import { PageHeader, Panel, RoleGate, EmptyState, th, td } from "@/components/mi
 import { demoActions, latestReviewedRun, nextId, nowStamp, useDemo } from "@/lib/demo-store";
 import { REPORT_TYPE_DESCRIPTIONS, REPORT_TYPE_LABELS, formatDate, type ReportType } from "@/lib/demo-data";
 import { cn } from "@/lib/utils";
+import { canViewReport } from "@/lib/demo-rules";
 
 export const Route = createFileRoute("/_console/reports/")({
   validateSearch: (s: Record<string, unknown>): { incident?: string | undefined } => ({
@@ -26,13 +27,13 @@ export const Route = createFileRoute("/_console/reports/")({
 
 function Reports() {
   const search = Route.useSearch();
-  const { reports, incidents, role } = useDemo();
+  const { reports, incidents, runs, role } = useDemo();
   const [type, setType] = useState<"all" | ReportType>("all");
   const [open, setOpen] = useState(false);
   useEffect(() => { if (search.incident && role === "analyst") setOpen(true); }, [search.incident, role]);
   const rows = reports
     .filter((r) => type === "all" || r.type === type)
-    .filter((r) => role !== "responder" || incidents.find((i) => i.id === r.incidentId)?.sharedWithResponders);
+    .filter((r) => canViewReport(role, r, incidents, runs));
   return (
     <>
       <PageHeader title="التقارير" description="تقارير PDF للتحليلات التي تمت مراجعتها."
@@ -85,11 +86,11 @@ function CreateDialog({ open, onOpenChange, initialIncident }: { open: boolean; 
   const run = reviewedRuns.find((r) => r.id === runId) ?? reviewedRuns[0];
   const [sel, setSel] = useState<string[]>([]);
   useEffect(() => { if (initialIncident && eligible.some((i) => i.id === initialIncident)) setIncId(initialIncident); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [initialIncident]);
-  useEffect(() => { setSel(run ? (type === "disaster" ? [run.days[run.days.length - 1]!.imageId] : run.days.map((d) => d.imageId)) : []); }, [run?.id, type]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { const last = run?.days.at(-1); setSel(run ? (type === "disaster" ? (last ? [last.imageId] : []) : run.days.map((d) => d.imageId)) : []); }, [run?.id, type]); // eslint-disable-line react-hooks/exhaustive-deps
   const min = type === "progress" ? 2 : 1;
   const ok = !!run && sel.length >= min;
   const create = () => {
-    if (!run) return;
+    if (!run || !ok) return;
     const id = nextId("RPT", reports);
     demoActions.addReport({ id, type, incidentId: incId, runId: run.id, imageIds: run.days.filter((d) => sel.includes(d.imageId)).map((d) => d.imageId), createdAt: nowStamp(), createdBy: userName });
     onOpenChange(false);

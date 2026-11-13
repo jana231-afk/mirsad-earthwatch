@@ -95,6 +95,11 @@ export function nowStamp() {
 }
 
 export const demoActions = {
+  logout() {
+    try { window.localStorage.removeItem("mirsad-demo-session"); } catch { /* ignore */ }
+    state = { ...state, role: initial.role, userName: initial.userName };
+    emit();
+  },
   login(role: Role, userName: string) {
     set({ role, userName });
   },

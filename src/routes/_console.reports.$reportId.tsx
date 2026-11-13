@@ -8,9 +8,10 @@ import { MapViewer, MapLegend } from "@/components/mirsad/MapViewer";
 import { AREA_DISCLAIMER } from "@/components/mirsad/RunSummary";
 import { ComparisonChart, ComparisonTable, comparisonSummary } from "@/components/mirsad/DailyComparison";
 import { useDemo } from "@/lib/demo-store";
+import { canViewReport } from "@/lib/demo-rules";
 import {
   LIMITATIONS, METHODOLOGY, REPORT_TYPE_LABELS, RUN_STATUS_LABELS, TYPE_LABELS, INCIDENT_STATUS_LABELS,
-  dayLabel, formatDate, formatKm2, formatPct, formatRange, incidentStatus, todayISO, type DayResult,
+  dayLabel, formatDate, formatKm2, formatPct, formatRange, incidentStatus, type DayResult,
 } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_console/reports/$reportId")({
@@ -42,14 +43,16 @@ function ReportPage() {
   const rep = reports.find((r) => r.id === reportId);
   const run = rep && runs.find((r) => r.id === rep.runId);
   const inc = rep && incidents.find((i) => i.id === rep.incidentId);
+  const accessible = rep ? canViewReport(role, rep, incidents, runs) : false;
   useEffect(() => {
-    if (download && rep) { const t = setTimeout(() => window.print(), 400); return () => clearTimeout(t); }
+    if (download && accessible) { const t = setTimeout(() => window.print(), 400); return () => clearTimeout(t); }
     return undefined;
-  }, [download, rep]);
+  }, [download, accessible]);
   if (!rep || !run || !inc) return <EmptyState title="التقرير غير موجود" />;
-  if (role === "responder" && !inc.sharedWithResponders) return <EmptyState title="التقرير غير متاح">هذه الحالة غير مصرح بها لحسابك.</EmptyState>;
+  if (!accessible) return <EmptyState title="التقرير غير متاح">يتطلب التقرير حالة مصرحاً بها ونتيجة تمت مراجعتها.</EmptyState>;
   const days: DayResult[] = run.days.filter((d) => rep.imageIds.includes(d.imageId));
-  const last = days[days.length - 1] ?? run.days[run.days.length - 1]!;
+  const last = days.at(-1);
+  if (!last) return <EmptyState title="لا توجد صور مشمولة في التقرير" />;
   const imgs = images.filter((m) => run.imageIds.includes(m.id) && (rep.imageIds.includes(m.id) || m.imageRole === "pre"));
 
   return (
@@ -58,7 +61,7 @@ function ReportPage() {
         <Button asChild variant="ghost"><Link to="/reports" search={{}}><ArrowRight /> العودة إلى التقارير</Link></Button>
         <Button onClick={() => window.print()}><Download /> تحميل PDF</Button>
       </div>
-      <article className="print-sheet mx-auto max-w-[860px] rounded-lg border bg-card p-10 shadow-panel">
+      <article className="print-sheet mx-auto max-w-[860px] rounded-lg border bg-card p-4 sm:p-10 shadow-panel">
         <header className="flex items-start justify-between gap-4 border-b pb-5">
           <div className="flex items-center gap-3">
             <LogoMark className="h-12 w-12" />
@@ -66,7 +69,7 @@ function ReportPage() {
           </div>
           <div className="text-end text-xs text-muted-foreground">
             <div>رقم التقرير: <span className="ltr font-mono">{rep.id}</span></div>
-            <div>تاريخ الإصدار: {formatDate(todayISO())}</div>
+            <div>تاريخ الإصدار: {formatDate(rep.createdAt)}</div>
             <div>بيانات تجريبية</div>
           </div>
         </header>

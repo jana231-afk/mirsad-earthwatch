@@ -5,8 +5,8 @@ import heroBg from "@/assets/hero-terrain.jpg";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/mirsad/Logo";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { DEMO_ACCOUNTS, ROLE_HOME, ROLE_LABELS, USERS, type Role } from "@/lib/demo-data";
-import { demoActions } from "@/lib/demo-store";
+import { DEMO_ACCOUNTS, ROLE_HOME, ROLE_LABELS, type Role } from "@/lib/demo-data";
+import { demoActions, useDemo } from "@/lib/demo-store";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { users } = useDemo();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -35,8 +36,8 @@ function LoginPage() {
       setError("يرجى إدخال اسم المستخدم أو البريد الإلكتروني وكلمة المرور.");
       return;
     }
-    const user = USERS.find((u) => u.email.toLowerCase() === email.trim().toLowerCase() || u.name === email.trim());
-    if (!user || !user.active) {
+    const user = users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase() || u.name === email.trim());
+    if (!user || !user.active || password !== "demo1234") {
       setError("بيانات الدخول غير صحيحة أو الحساب معطّل.");
       return;
     }

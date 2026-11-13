@@ -26,8 +26,8 @@ export const Route = createFileRoute("/_console/users")({
 
 const ROLE_DESC: Record<Role, { icon: typeof ShieldCheck; perms: string }> = {
   admin: { icon: ShieldCheck, perms: "إدارة حسابات المستخدمين وأدوارهم." },
-  analyst: { icon: Map, perms: "إنشاء الحوادث، رفع الصور، تشغيل التحليلات، مراجعة النتائج، وإصدار التقارير." },
-  responder: { icon: Eye, perms: "عرض الحوادث المصرح بها والنتائج المعتمدة فقط (قراءة فقط)." },
+  analyst: { icon: Map, perms: "إنشاء الحالات، رفع الصور، تشغيل التحليلات، مراجعة النتائج، وإصدار التقارير." },
+  responder: { icon: Eye, perms: "عرض الحالات المصرح بها والنتائج المراجَعة فقط (قراءة فقط)." },
 };
 
 function UsersPage() {
@@ -138,16 +138,16 @@ function UsersPage() {
         <Panel title="إضافة مستخدم" className="self-start">
           <form onSubmit={add} className="space-y-4" noValidate>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">الاسم الكامل</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} className="field" maxLength={80} />
+              <label htmlFor="user-name" className="text-sm font-medium">الاسم الكامل</label>
+              <input id="user-name" value={name} onChange={(e) => setName(e.target.value)} className="field" maxLength={80} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">البريد الإلكتروني</label>
-              <input value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" className="field text-start" placeholder="user@mirsad.sa" maxLength={120} />
+              <label htmlFor="user-email" className="text-sm font-medium">البريد الإلكتروني</label>
+              <input id="user-email" value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" className="field text-start" placeholder="user@mirsad.sa" maxLength={120} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">الدور</label>
-              <select value={role} onChange={(e) => setRole(e.target.value as Role)} className="field">
+              <label htmlFor="user-role" className="text-sm font-medium">الدور</label>
+              <select id="user-role" value={role} onChange={(e) => setRole(e.target.value as Role)} className="field">
                 {(Object.keys(ROLE_LABELS) as Role[]).map((r) => (
                   <option key={r} value={r}>{ROLE_LABELS[r]}</option>
                 ))}
@@ -157,7 +157,7 @@ function UsersPage() {
             <Button type="submit" className="w-full">
               <UserPlus /> إنشاء الحساب
             </Button>
-            <p className="text-[11px] text-muted-foreground">تُرسل كلمة مرور مؤقتة للمستخدم ويُطلب تغييرها عند أول دخول.</p>
+            <p className="text-[11px] text-muted-foreground">حساب تجريبي؛ كلمة المرور <span className="ltr">demo1234</span>. لا تُرسل رسائل بريد.</p>
           </form>
         </Panel>
       </div>

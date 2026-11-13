@@ -1,7 +1,8 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, FolderOpen, UploadCloud, History, FileText, Users, LogOut, MapPinned } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useDemo } from "@/lib/demo-store";
+import { demoActions, useDemo } from "@/lib/demo-store";
+import { Button } from "@/components/ui/button";
 import type { Role } from "@/lib/demo-data";
 import { Logo, LogoMark } from "./Logo";
 
@@ -68,9 +69,10 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
       </nav>
 
       <div className="border-t border-sidebar-border p-3">
-        <button
+        <Button
+          variant="ghost"
           type="button"
-          onClick={() => navigate({ to: "/", replace: true })}
+          onClick={() => { demoActions.logout(); navigate({ to: "/", replace: true }); }}
           title={collapsed ? "تسجيل الخروج" : undefined}
           className={cn(
             "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
@@ -79,7 +81,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
         >
           <LogOut className="h-[18px] w-[18px] shrink-0 rtl:rotate-180" />
           {!collapsed && <span className="font-medium">تسجيل الخروج</span>}
-        </button>
+        </Button>
       </div>
     </aside>
   );
