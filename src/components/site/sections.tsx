@@ -136,7 +136,7 @@ export function TypesContent() {
   );
 }
 
-export function DemoMapContent({ height }: { height?: number }) {
+export function DemoMapContent({ height }: { height?: number | undefined }) {
   return (
     <div className="rounded-lg border bg-card p-4 shadow-card">
       <div className="mb-3 flex flex-wrap items-center gap-4 text-sm">

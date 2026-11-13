@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { DEMO_AREAS } from "./demo-areas";
 
 /** Browser-only Leaflet map — always load via React.lazy behind ClientOnly. */
-export default function DemoMapLeaflet({ height = 460 }: { height?: number }) {
+export default function DemoMapLeaflet({ height = 460 }: { height?: number | undefined }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!ref.current) return;

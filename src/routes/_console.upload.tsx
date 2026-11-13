@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_console/upload")({
 });
 
 type Check = { label: string; value: string; ok: boolean | "warn" };
-type Item = { key: string; file: File; sensor: string; role: ImageRole; date: string; dateFromMeta: boolean; result?: { supported: boolean; checks: Check[]; warnings: string[] } };
+type Item = { key: string; file: File; sensor: string; role: ImageRole; date: string; dateFromMeta: boolean; result?: undefined | { supported: boolean; checks: Check[]; warnings: string[] } };
 
 function dateFromName(name: string) {
   const m = name.match(/(20\d{2})-?(\d{2})-?(\d{2})/);
