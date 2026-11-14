@@ -13,6 +13,8 @@ import { formatDate } from "@/lib/demo-data";
 export const Route = createFileRoute("/_console/review/$runId")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "مراجعة المحلل · مِرصاد" },
       { name: "description", content: "مراجعة نتيجة التحليل الآلي واعتمادها أو طلب تصحيحها." },
       { property: "og:title", content: "مراجعة المحلل · مِرصاد" },

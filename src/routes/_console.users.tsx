@@ -11,6 +11,8 @@ import { ROLE_LABELS, type Role } from "@/lib/demo-data";
 export const Route = createFileRoute("/_console/users")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "إدارة المستخدمين · مِرصاد" },
       { name: "description", content: "صفحة مدير النظام لإدارة حسابات المستخدمين وأدوارهم." },
       { property: "og:title", content: "إدارة المستخدمين · مِرصاد" },

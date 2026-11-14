@@ -16,6 +16,8 @@ export const Route = createFileRoute("/_console/reports/")({
   }),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "التقارير · مِرصاد" },
       { name: "description", content: "تقارير الكارثة وتقارير التطور اليومي بصيغة PDF." },
       { property: "og:title", content: "التقارير · مِرصاد" },

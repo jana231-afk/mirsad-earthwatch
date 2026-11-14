@@ -7,6 +7,8 @@ import { demoActions, useDemo } from "@/lib/demo-store";
 export const Route = createFileRoute("/_console/incidents/new")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "إنشاء حالة جديدة · مِرصاد" },
       { name: "description", content: "إنشاء سجل حالة كارثة جديدة بتاريخ البداية والنهاية." },
       { property: "og:title", content: "إنشاء حالة جديدة · مِرصاد" },

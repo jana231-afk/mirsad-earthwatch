@@ -14,6 +14,8 @@ import { canViewReport } from "@/lib/demo-rules";
 export const Route = createFileRoute("/_console/field/$id")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "تفاصيل الحالة للمستجيب · مِرصاد" },
       { name: "description", content: "عرض للقراءة فقط لآخر نتيجة مراجَعة وخريطتها وإحصاءاتها." },
       { property: "og:title", content: "تفاصيل الحالة · مِرصاد" },

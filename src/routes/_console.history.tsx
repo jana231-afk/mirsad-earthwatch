@@ -9,6 +9,8 @@ import { RUN_STATUS_LABELS, formatDate, formatKm2, formatPct, latestDay, type Ru
 export const Route = createFileRoute("/_console/history")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "سجل التحليلات · مِرصاد" },
       { name: "description", content: "جميع عمليات التحليل الآلي وحالة مراجعتها." },
       { property: "og:title", content: "سجل التحليلات · مِرصاد" },

@@ -9,6 +9,8 @@ import { formatDate, incidentStatus, type IncidentStatus, type IncidentType } fr
 export const Route = createFileRoute("/_console/incidents/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "الحالات · مِرصاد" },
       { name: "description", content: "إدارة حالات الفيضانات والحرائق والبحث فيها وتصفيتها." },
       { property: "og:title", content: "الحالات · مِرصاد" },

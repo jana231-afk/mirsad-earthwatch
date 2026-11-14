@@ -14,6 +14,8 @@ export const Route = createFileRoute("/_console/results/$runId")({
   }),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "نتائج التحليل · مِرصاد" },
       { name: "description", content: "خريطة نتيجة التحليل والمساحة المتأثرة والمقارنة بين الأيام." },
       { property: "og:title", content: "نتائج التحليل · مِرصاد" },

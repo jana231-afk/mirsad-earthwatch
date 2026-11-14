@@ -8,6 +8,8 @@ import { formatKm2, formatPct, latestDay } from "@/lib/demo-data";
 export const Route = createFileRoute("/_console/field/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "الحالات المصرح بها · مِرصاد" },
       { name: "description", content: "قائمة الحالات المتاحة للمستجيب الميداني مع آخر نتيجة مراجَعة." },
       { property: "og:title", content: "الحالات المصرح بها · مِرصاد" },

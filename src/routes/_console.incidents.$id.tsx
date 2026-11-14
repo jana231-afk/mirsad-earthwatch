@@ -13,6 +13,8 @@ import { IMAGE_ROLE_LABELS, daysBetween, formatDate, latestDay } from "@/lib/dem
 export const Route = createFileRoute("/_console/incidents/$id")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "تفاصيل الحالة · مِرصاد" },
       { name: "description", content: "بيانات الحالة والصور المرفوعة والتحليلات السابقة وآخر نتيجة مراجَعة." },
       { property: "og:title", content: "تفاصيل الحالة · مِرصاد" },

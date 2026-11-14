@@ -8,6 +8,8 @@ import { formatDate } from "@/lib/demo-data";
 export const Route = createFileRoute("/_console/dashboard")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "لوحة التحكم · مِرصاد" },
       { name: "description", content: "ملخص الحالات والتحليلات المكتملة لمحلل نظم المعلومات الجغرافية." },
       { property: "og:title", content: "لوحة التحكم · مِرصاد" },

@@ -14,6 +14,8 @@ export const Route = createFileRoute("/_console/upload")({
   }),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "رفع الصور · مِرصاد" },
       { name: "description", content: "رفع صورة جغرافية أو عدة صور بصيغة GeoTIFF والتحقق من بياناتها." },
       { property: "og:title", content: "رفع الصور · مِرصاد" },
@@ -74,10 +76,11 @@ function UploadPage() {
 
   const add = (files: FileList | null) => {
     if (!files) return;
+    const pickedFiles = Array.from(files);
     setSaved(false);
     setItems((prev) => [
       ...prev,
-      ...Array.from(files).map((f, i) => {
+      ...pickedFiles.map((f, i) => {
         const d = dateFromName(f.name);
         return { key: `${f.name}-${Date.now()}-${i}`, file: f, sensor: "غير معروف", role: (inc?.type === "fire" ? "post" : "event") as ImageRole, date: d, dateFromMeta: false };
       }),

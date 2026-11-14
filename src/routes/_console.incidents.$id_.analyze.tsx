@@ -14,6 +14,8 @@ import { canAnalyzeImages } from "@/lib/demo-rules";
 export const Route = createFileRoute("/_console/incidents/$id_/analyze")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "تحليل الكارثة · مِرصاد" },
       { name: "description", content: "اختيار صور الحالة وتشغيل نموذج التقسيم الآلي للفيضانات أو المناطق المحروقة." },
       { property: "og:title", content: "تحليل الكارثة · مِرصاد" },
