@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState, type DragEvent } from "react";
 import { toast } from "sonner";
-import { UploadCloud, X, ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Save, Info } from "lucide-react";
+import { UploadCloud, Send, Clock, X, ShieldCheck, CheckCircle2, XCircle, AlertTriangle, Save, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader, Panel, RoleGate, Notice } from "@/components/mirsad/bits";
 import { cn } from "@/lib/utils";
-import { demoActions, nextId, useDemo } from "@/lib/demo-store";
-import { SENSORS, demoPreview, todayISO, type GeoImage, type ImageRole } from "@/lib/demo-data";
+import { demoActions, nextId, nowStamp, useDemo } from "@/lib/demo-store";
+import { SENSORS, TYPE_LABELS, demoPreview, joinLocation, todayISO, type GeoImage, type ImageRole, type Incident } from "@/lib/demo-data";
+import { imageRequestPeriodError } from "@/lib/demo-rules";
 
 export const Route = createFileRoute("/_console/upload")({
   validateSearch: (s: Record<string, unknown>): { incident?: string | undefined } => ({
@@ -16,8 +17,8 @@ export const Route = createFileRoute("/_console/upload")({
     meta: [
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "رفع الصور · مِرصاد" },
-      { name: "description", content: "رفع صورة جغرافية أو عدة صور بصيغة GeoTIFF والتحقق من بياناتها." },
+      { title: "رفع الصور وطلبها · مِرصاد" },
+      { name: "description", content: "رفع صور GeoTIFF من الجهاز أو طلب صور من مزوّد البيانات للحالة." },
       { property: "og:title", content: "رفع الصور · مِرصاد" },
       { property: "og:description", content: "رفع الصور الجغرافية والتحقق من نظام الإحداثيات والأبعاد والنطاقات." },
     ],
@@ -72,6 +73,7 @@ function UploadPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [drag, setDrag] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [mode, setMode] = useState<"device" | "request">("device");
   const input = useRef<HTMLInputElement>(null);
 
   const add = (files: FileList | null) => {
@@ -119,7 +121,7 @@ function UploadPage() {
 
   return (
     <>
-      <PageHeader title="رفع الصور" description="ارفع صورة جغرافية واحدة أو عدة صور معاً بصيغة GeoTIFF، ثم تحقق منها قبل الحفظ." />
+      <PageHeader title="رفع الصور" description="اختر طريقة الحصول على الصور: رفعها من جهازك أو طلبها من مزوّد البيانات." />
       <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
         <div className="space-y-6">
           <Panel title="الحالة">
@@ -127,6 +129,19 @@ function UploadPage() {
               {incidents.map((i) => <option key={i.id} value={i.id}>{i.name} ({i.id})</option>)}
             </select>
           </Panel>
+          <div role="tablist" aria-label="طريقة الحصول على الصور" className="grid gap-3 sm:grid-cols-2">
+            {([
+              ["device", UploadCloud, "رفع الصور من الجهاز", "ملفات GeoTIFF موجودة لديك"],
+              ["request", Send, "طلب صور من مزوّد البيانات", "إرسال طلب لفترة ومنطقة محددتين"],
+            ] as const).map(([k, Icon, t, d]) => (
+              <button key={k} type="button" role="tab" aria-selected={mode === k} onClick={() => setMode(k)}
+                className={cn("flex items-start gap-3 rounded-lg border-2 bg-card p-4 text-start transition-colors hover:border-primary/60", mode === k ? "border-primary bg-primary-soft" : "border-border")}>
+                <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-md", mode === k ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}><Icon className="h-5 w-5" /></span>
+                <span><span className="block font-semibold">{t}</span><span className="mt-0.5 block text-sm text-muted-foreground">{d}</span></span>
+              </button>
+            ))}
+          </div>
+          {mode === "request" ? (inc ? <RequestImages inc={inc} /> : null) : (<>
           <div
             onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
             onDragLeave={() => setDrag(false)}
@@ -192,14 +207,85 @@ function UploadPage() {
               </span>
             </Notice>
           )}
+          </>)}
         </div>
         <div className="space-y-4">
           <Notice tone="info" icon={<Info className="h-4 w-4" />} title="ملاحظات">
-            يجب أن يكون لكل صورة تاريخ التقاط. إذا أُضيفت صورة بتاريخ لاحق إلى حالة مغلقة تعود الحالة «نشطة» تلقائياً. لا يقوم النظام بتنزيل الصور آلياً.
+            يجب أن يكون لكل صورة تاريخ التقاط. إذا أُضيفت صورة بتاريخ لاحق إلى حالة مغلقة تعود الحالة «نشطة» تلقائياً. لا يقوم النظام بتنزيل الصور آلياً؛ الصور المطلوبة من المزوّد تمر بالتحقق نفسه عند وصولها.
           </Notice>
           <Notice tone="warning" title="بيانات تجريبية">نتائج التحقق والخريطة تمثيلية، وليست قراءة فعلية للملف. التاريخ المقترح من اسم الملف قابل للتعديل.</Notice>
         </div>
       </div>
+    </>
+  );
+}
+
+function RequestImages({ inc }: { inc: Incident }) {
+  const { incidents, imageRequests, userName } = useDemo();
+  const [area, setArea] = useState(joinLocation(inc.region, inc.city, inc.district));
+  const [type, setType] = useState<Incident["type"]>(inc.type);
+  const [fromDate, setFrom] = useState(inc.startDate);
+  const [toDate, setTo] = useState(inc.endDate ?? todayISO());
+  const [notes, setNotes] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [key, setKey] = useState(inc.id);
+  if (key !== inc.id) {
+    setKey(inc.id); setArea(joinLocation(inc.region, inc.city, inc.district)); setType(inc.type);
+    setFrom(inc.startDate); setTo(inc.endDate ?? todayISO()); setError(null);
+  }
+  const submit = () => {
+    const err = !area.trim() ? "حدد المنطقة الجغرافية المطلوبة." : imageRequestPeriodError(fromDate, toDate, todayISO());
+    setError(err);
+    if (err) return;
+    demoActions.addImageRequest({
+      id: nextId("REQ", imageRequests), incidentId: inc.id, area: area.trim(), fromDate, toDate, type, notes: notes.trim(),
+      requestedAt: nowStamp(), requestedBy: userName, status: "awaiting_provider",
+    });
+    setNotes("");
+    toast.success("تم إرسال طلب الصور، وهو بانتظار معالجة مزوّد البيانات");
+  };
+  const name = (id: string) => incidents.find((i) => i.id === id)?.name ?? id;
+  return (
+    <>
+      <Panel title="طلب صور من مزوّد البيانات">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="space-y-1 text-sm sm:col-span-2"><span className="text-xs text-muted-foreground">المنطقة الجغرافية (من موقع الحالة، ويمكن تحديدها بدقة أكبر)</span>
+            <input className="field" value={area} onChange={(e) => setArea(e.target.value)} />
+          </label>
+          <label className="space-y-1 text-sm"><span className="text-xs text-muted-foreground">تاريخ بداية الفترة المطلوبة</span>
+            <input type="date" className="field" value={fromDate} max={todayISO()} onChange={(e) => setFrom(e.target.value)} />
+          </label>
+          <label className="space-y-1 text-sm"><span className="text-xs text-muted-foreground">تاريخ نهاية الفترة المطلوبة</span>
+            <input type="date" className="field" value={toDate} max={todayISO()} onChange={(e) => setTo(e.target.value)} />
+          </label>
+          <label className="space-y-1 text-sm"><span className="text-xs text-muted-foreground">نوع الكارثة</span>
+            <select className="field" value={type} onChange={(e) => setType(e.target.value as Incident["type"])}>
+              <option value="flood">{TYPE_LABELS.flood}</option><option value="fire">حريق غابات</option>
+            </select>
+          </label>
+          <label className="space-y-1 text-sm sm:col-span-2"><span className="text-xs text-muted-foreground">ملاحظات إضافية (اختياري)</span>
+            <textarea className="field min-h-20" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </label>
+        </div>
+        {error && <div className="mt-3"><Notice tone="danger">{error}</Notice></div>}
+        <Button className="mt-4" onClick={submit}><Send /> إرسال طلب الصور</Button>
+      </Panel>
+      <Panel title="الطلبات المرسلة">
+        {imageRequests.length === 0 ? <p className="text-sm text-muted-foreground">لا توجد طلبات مرسلة بعد.</p> : (
+          <ul className="divide-y">
+            {imageRequests.map((r) => (
+              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+                <div>
+                  <div className="font-medium">{name(r.incidentId)} · {r.type === "fire" ? "حريق غابات" : TYPE_LABELS.flood}</div>
+                  <div className="text-xs text-muted-foreground">{r.area} · <span className="ltr">{r.fromDate}</span> إلى <span className="ltr">{r.toDate}</span> · <span className="ltr">{r.id}</span></div>
+                </div>
+                <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2.5 py-1 text-xs text-warning-foreground"><Clock className="h-3.5 w-3.5" /> بانتظار معالجة مزوّد البيانات</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="mt-3 text-xs text-muted-foreground">لا يوجد ربط فعلي مع مزوّد بيانات في هذا النموذج؛ يُسجَّل الطلب فقط ولا تُستلم صور.</p>
+      </Panel>
     </>
   );
 }

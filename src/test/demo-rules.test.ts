@@ -53,3 +53,15 @@ describe("analysis image selection", () => {
     expect(canAnalyzeImages("flood", IMAGES.slice(0, 1).map((image) => ({ ...image, status: "unsupported" })))).toBe(false);
   });
 });
+import { imageRequestPeriodError } from "@/lib/demo-rules";
+describe("image request period", () => {
+  it("rejects a start date after the end date", () => {
+    expect(imageRequestPeriodError("2026-11-10", "2026-11-05", "2026-11-17")).not.toBeNull();
+  });
+  it("rejects future end dates", () => {
+    expect(imageRequestPeriodError("2026-11-10", "2026-11-20", "2026-11-17")).not.toBeNull();
+  });
+  it("accepts a valid past period", () => {
+    expect(imageRequestPeriodError("2026-11-01", "2026-11-17", "2026-11-17")).toBeNull();
+  });
+});

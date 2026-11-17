@@ -25,6 +25,21 @@ export interface DemoState {
   runs: AnalysisRun[];
   reports: Report[];
   users: User[];
+  imageRequests: ImageRequest[];
+}
+
+/** Imagery request sent to the data provider. No provider integration exists, so it stays awaiting. */
+export interface ImageRequest {
+  id: string;
+  incidentId: string;
+  area: string;
+  fromDate: string;
+  toDate: string;
+  type: Incident["type"];
+  notes: string;
+  requestedAt: string;
+  requestedBy: string;
+  status: "awaiting_provider";
 }
 
 const initial: DemoState = {
@@ -35,6 +50,7 @@ const initial: DemoState = {
   runs: RUNS,
   reports: REPORTS,
   users: USERS,
+  imageRequests: [],
 };
 
 let state: DemoState = initial;
@@ -124,6 +140,9 @@ export const demoActions = {
   },
   addReport(report: Report) {
     set({ reports: [report, ...state.reports] });
+  },
+  addImageRequest(request: ImageRequest) {
+    set({ imageRequests: [request, ...state.imageRequests] });
   },
   addUser(user: User) {
     set({ users: [...state.users, user] });

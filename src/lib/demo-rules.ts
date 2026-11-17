@@ -18,3 +18,10 @@ export function canAnalyzeImages(type: Incident["type"], images: GeoImage[], pre
     image.id === pre.id || image.id === post.id || (image.imageRole === "later" && image.acquisitionDate >= post.acquisitionDate),
   );
 }
+/** Returns an Arabic error for an imagery request period, or null when valid. */
+export function imageRequestPeriodError(fromDate: string, toDate: string, today: string) {
+  if (!fromDate || !toDate) return "حدد تاريخ بداية الفترة ونهايتها.";
+  if (fromDate > toDate) return "تاريخ بداية الفترة يجب أن يسبق تاريخ نهايتها أو يساويه.";
+  if (toDate > today) return "لا يمكن طلب صور لتاريخ مستقبلي.";
+  return null;
+}

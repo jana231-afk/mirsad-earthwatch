@@ -12,7 +12,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-50 border-b border-navy-line bg-navy-deep text-navy-foreground">
+      <header className="sticky top-0 z-50 border-b border-navy-foreground/10 bg-navy-deep text-navy-foreground">
         <div className="mx-auto flex h-18 max-w-7xl items-center gap-6 px-6 py-3">
           <Link to="/" aria-label="مِرصاد – الرئيسية">
             <Logo inverted />

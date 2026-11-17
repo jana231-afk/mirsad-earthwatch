@@ -5,7 +5,7 @@ import {
   ArrowLeft, UploadCloud, Cpu, UserCheck, FileText, Waves, Flame, Hourglass, ShieldCheck, Map, Users, Target, AlertCircle, Mail, Send,
 } from "lucide-react";
 import heroBg from "@/assets/hero-terrain.jpg";
-import heroMapImg from "@/assets/hero-disaster-map.jpg";
+import heroMapAsset from "@/assets/hero-reference-map.jpg.asset.json";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { DemoTag, ExperimentalBadge } from "@/components/mirsad/bits";
@@ -14,22 +14,22 @@ import { cn } from "@/lib/utils";
 
 const DemoMapLeaflet = lazy(() => import("./DemoMapLeaflet"));
 
-/** Home hero: headline + two buttons beside a static illustrative map image. */
+/** Home hero: headline + two buttons, with the reference map image blended into the background. */
 export function MapHero() {
   return (
-    <section className="bg-navy-deep text-navy-foreground">
-      <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-14 lg:grid-cols-[0.75fr_1.25fr]">
-        <div>
-          <h1 className="text-3xl font-bold leading-[1.35] md:text-5xl md:leading-[1.3]">رصد وتقييم الكوارث من الصور الجغرافية</h1>
+    <section className="hero-scene overflow-hidden text-navy-foreground">
+      <div className="mx-auto grid max-w-[1400px] items-center gap-4 px-4 py-8 lg:grid-cols-[0.8fr_1.2fr] lg:py-6">
+        <div className="px-2 lg:ps-6">
+          <h1 className="text-3xl font-extrabold leading-[1.35] md:text-5xl md:leading-[1.3] xl:text-[3.5rem] xl:leading-[1.3]">رصد وتقييم الكوارث من الصور الجغرافية</h1>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg"><Link to="/login">تسجيل الدخول</Link></Button>
-            <Button asChild size="lg" variant="outline" className="border-navy-line bg-transparent text-navy-foreground hover:bg-navy-line/60 hover:text-navy-foreground">
+            <Button asChild size="lg" variant="outline" className="border-navy-foreground/25 bg-transparent text-navy-foreground hover:bg-navy-foreground/10 hover:text-navy-foreground">
               <Link to="/about">عن المشروع</Link>
             </Button>
           </div>
         </div>
-        <img src={heroMapImg} alt="منظر لمنطقة متأثرة بحريق غابات وفيضان" width={992} height={672}
-          className="h-auto w-full rounded-xl border border-navy-line object-cover shadow-2xl" />
+        <img src={heroMapAsset.url} alt="منطقة متأثرة بحريق غابات وفيضان على صورة جغرافية" width={902} height={645}
+          className="hero-fade h-auto w-full lg:-ms-10 lg:w-[calc(100%+2.5rem)]" />
       </div>
     </section>
   );

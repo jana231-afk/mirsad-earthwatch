@@ -117,6 +117,8 @@
 
   --navy: oklch(0.235 0.055 258);
   --navy-deep: oklch(0.18 0.045 260);
+  --hero-sea: oklch(0.25 0.045 232);
+  --hero-gradient: radial-gradient(ellipse 70% 90% at 30% 50%, color-mix(in oklab, var(--hero-sea) 85%, var(--navy-deep)) 0%, var(--navy-deep) 75%);
   --navy-foreground: oklch(0.96 0.01 240);
   --navy-muted: oklch(0.72 0.03 245);
   --navy-line: oklch(0.32 0.05 258);
@@ -280,3 +282,11 @@
 }
 .hero-pin-fire { border-color: var(--burn); box-shadow: 0 0 12px var(--burn); }
 .hero-pin-flood { border-color: var(--water); box-shadow: 0 0 12px var(--water); }
+
+@utility hero-scene { background: var(--hero-gradient); }
+@utility hero-fade {
+  -webkit-mask-image: linear-gradient(to left, transparent 0%, #000 18%, #000 88%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 10%, #000 85%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to left, transparent 0%, #000 18%, #000 88%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 10%, #000 85%, transparent 100%);
+  mask-composite: intersect;
+}
