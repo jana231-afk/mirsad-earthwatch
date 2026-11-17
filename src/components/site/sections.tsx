@@ -2,7 +2,7 @@ import { lazy, Suspense, useState, type ReactNode } from "react";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
-  ArrowLeft, UploadCloud, Cpu, UserCheck, FileText, Waves, Flame, Hourglass, ShieldCheck, Map, Users, Target, AlertCircle, Mail, Send,
+  ArrowLeft, ScanSearch, Layers, UploadCloud, Cpu, UserCheck, FileText, Waves, Flame, Hourglass, ShieldCheck, Map, Users, Target, AlertCircle, Mail, Send,
 } from "lucide-react";
 import heroBg from "@/assets/hero-terrain.jpg";
 import heroMapAsset from "@/assets/hero-reference-map.jpg.asset.json";
@@ -14,22 +14,46 @@ import { cn } from "@/lib/utils";
 
 const DemoMapLeaflet = lazy(() => import("./DemoMapLeaflet"));
 
-/** Home hero: headline + two buttons, with the reference map image blended into the background. */
+const HERO_FEATURES = [
+  { icon: ScanSearch, title: "تحليل الصور", text: "باستخدام الذكاء الاصطناعي" },
+  { icon: Layers, title: "خرائط جغرافية", text: "للمناطق المتأثرة" },
+  { icon: FileText, title: "تقارير تقييم", text: "نتائج وإحصاءات واضحة" },
+];
+
+/** Home hero: headline, short description, two buttons, three highlights, and the reference map blended into a glowing scene. */
 export function MapHero() {
   return (
-    <section className="hero-scene overflow-hidden text-navy-foreground">
-      <div className="mx-auto grid max-w-[1400px] items-center gap-4 px-4 py-8 lg:grid-cols-[0.8fr_1.2fr] lg:py-6">
+    <section className="hero-scene relative overflow-hidden text-navy-foreground">
+      <div aria-hidden className="hero-grid pointer-events-none absolute inset-0" />
+      <div aria-hidden className="hero-glow pointer-events-none absolute inset-0" />
+      <svg aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-32 w-full" viewBox="0 0 1440 160" preserveAspectRatio="none" fill="none">
+        <path d="M0 120 C 360 40, 720 160, 1080 80 S 1440 60, 1440 60" className="hero-wave" strokeWidth="1.5" />
+        <path d="M0 140 C 400 70, 760 170, 1100 100 S 1440 90, 1440 90" className="hero-wave opacity-50" strokeWidth="1" />
+      </svg>
+      <div className="relative mx-auto grid max-w-[1400px] items-center gap-4 px-4 py-8 lg:grid-cols-[0.8fr_1.2fr] lg:py-6">
         <div className="px-2 lg:ps-6">
           <h1 className="text-3xl font-extrabold leading-[1.35] md:text-5xl md:leading-[1.3] xl:text-[3.5rem] xl:leading-[1.3]">رصد وتقييم الكوارث من الصور الجغرافية</h1>
+          <p className="mt-5 max-w-xl text-lg leading-relaxed text-navy-muted">منصة لرسم وتقييم المناطق المتأثرة بالكوارث من الصور الجغرافية، وإصدار تقارير تقييم موثقة.</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg"><Link to="/login">تسجيل الدخول</Link></Button>
-            <Button asChild size="lg" variant="outline" className="border-navy-foreground/25 bg-transparent text-navy-foreground hover:bg-navy-foreground/10 hover:text-navy-foreground">
-              <Link to="/about">عن المشروع</Link>
+            <Button asChild size="lg" className="hero-btn-primary"><Link to="/login">تسجيل الدخول</Link></Button>
+            <Button asChild size="lg" variant="ghost" className="hero-btn-ghost border">
+              <Link to="/" hash="about">عن المشروع</Link>
             </Button>
           </div>
+          <ul className="mt-10 grid grid-cols-3 divide-x divide-x-reverse divide-primary/25">
+            {HERO_FEATURES.map((f) => (
+              <li key={f.title} className="group flex flex-col items-center gap-3 px-2 text-center">
+                <span className="hero-icon grid h-16 w-16 place-items-center rounded-2xl transition-transform group-hover:-translate-y-1">
+                  <f.icon className="h-7 w-7" />
+                </span>
+                <span className="text-sm font-bold md:text-base">{f.title}</span>
+                <span className="text-xs text-navy-muted md:text-sm">{f.text}</span>
+              </li>
+            ))}
+          </ul>
         </div>
         <img src={heroMapAsset.url} alt="منطقة متأثرة بحريق غابات وفيضان على صورة جغرافية" width={902} height={645}
-          className="hero-fade h-auto w-full lg:-ms-10 lg:w-[calc(100%+2.5rem)]" />
+          className="hero-fade relative h-auto w-full lg:-ms-10 lg:w-[calc(100%+2.5rem)]" />
       </div>
     </section>
   );

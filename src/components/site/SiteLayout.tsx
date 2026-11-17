@@ -61,29 +61,10 @@ export function SiteLayout({ children }: { children: ReactNode }) {
 
       <main className="flex-1">{children}</main>
 
-      <footer className="bg-navy-deep text-navy-foreground">
-        <div className="mx-auto grid max-w-7xl gap-8 px-6 py-12 md:grid-cols-3">
-          <div>
-            <Logo inverted />
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-navy-muted">
-              منصة لرسم وتقييم المناطق المتأثرة بالكوارث من الصور الجغرافية، وإصدار تقارير تقييم موثقة.
-            </p>
-          </div>
-          <div>
-            <div className="mb-3 text-sm font-semibold">روابط سريعة</div>
-            <ul className="grid gap-2 text-sm text-navy-muted">
-              {NAV.map((n) => (
-                <li key={n.to}>
-                  <Link to={n.to} className="hover:text-navy-foreground">{n.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="text-sm text-navy-muted">
-            <div className="mb-3 text-sm font-semibold text-navy-foreground">الجهة</div>
-            <p>كلية الحاسبات وتقنية المعلومات (اسم تجريبي)</p>
-            <p className="mt-1">البريد: <span className="ltr">contact@mirsad.sa</span></p>
-          </div>
+      <footer className="border-t border-navy-line bg-navy-deep text-navy-foreground">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-6 text-sm text-navy-muted">
+          <p>كلية الحاسبات وتقنية المعلومات (اسم تجريبي)</p>
+          <p>البريد: <span className="ltr">contact@mirsad.sa</span></p>
         </div>
         <div className="border-t border-navy-line py-4 text-center text-xs text-navy-muted">جميع البيانات المعروضة بيانات تجريبية</div>
       </footer>

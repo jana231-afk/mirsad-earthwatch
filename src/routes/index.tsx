@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { MapHero, OFFICIAL_ABOUT, Section } from "@/components/site/sections";
+import { MapHero, OFFICIAL_ABOUT } from "@/components/site/sections";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,11 +20,15 @@ function Home() {
   return (
     <SiteLayout>
       <MapHero />
-      <Section title="عن المشروع">
-        <div className="max-w-4xl space-y-4 rounded-lg border bg-card p-6 text-base leading-loose text-foreground/85 shadow-card">
-          {OFFICIAL_ABOUT.map((p) => <p key={p}>{p}</p>)}
+      <section id="about" className="about-scene relative scroll-mt-20 py-16 text-navy-foreground">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h2 className="text-2xl font-bold md:text-3xl">عن المشروع</h2>
+          <div className="mx-auto mt-3 h-0.5 w-16 rounded bg-primary" />
+          <div className="mt-8 space-y-5 text-base leading-loose text-navy-foreground/85 md:text-lg">
+            {OFFICIAL_ABOUT.map((p) => <p key={p}>{p}</p>)}
+          </div>
         </div>
-      </Section>
+      </section>
     </SiteLayout>
   );
 }
