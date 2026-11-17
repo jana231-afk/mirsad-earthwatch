@@ -106,7 +106,8 @@ export default function HeroMapLeaflet() {
   const info = HERO_AREAS.find((a) => a.id === (hovered ?? selected));
 
   return (
-    <div className="relative h-[460px] w-full overflow-hidden rounded-xl border border-primary/40 shadow-panel lg:h-[540px]">
+    <div className="relative w-full">
+      <div className="relative h-[380px] overflow-hidden rounded-xl border border-primary/40 shadow-panel sm:h-[540px]">
       <div ref={el} dir="ltr" className="hero-map h-full w-full bg-navy-deep" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,var(--navy-deep)_120%)]" />
 
@@ -114,9 +115,10 @@ export default function HeroMapLeaflet() {
       <div className="absolute start-14 top-3 z-[500] inline-flex items-center gap-1.5 rounded-md border border-warning/50 bg-navy-deep/85 px-2.5 py-1 text-xs font-semibold text-warning backdrop-blur">
         <Database className="h-3.5 w-3.5" /> بيانات تجريبية
       </div>
+      </div>
 
       {/* Layers */}
-      <div className="absolute end-3 top-3 z-[500] w-52 rounded-lg border border-primary/40 bg-navy-deep/80 p-3 text-xs text-navy-foreground backdrop-blur">
+      <div className="z-[500] mt-2 rounded-lg sm:absolute sm:end-3 sm:top-3 sm:mt-0 sm:w-52 rounded-lg border border-primary/40 bg-navy-deep/80 p-3 text-xs text-navy-foreground backdrop-blur">
         <div className="mb-2 flex items-center gap-1.5 font-semibold"><Layers className="h-3.5 w-3.5 text-primary" /> طبقات الخريطة</div>
         {(Object.keys(LAYER_LABELS) as LayerKey[]).map((k) => (
           <label key={k} className="flex cursor-pointer items-center gap-2 py-1">
@@ -127,7 +129,7 @@ export default function HeroMapLeaflet() {
       </div>
 
       {/* Period selector + stats */}
-      <div className="absolute inset-x-3 bottom-3 z-[500] flex flex-wrap items-end justify-between gap-3">
+      <div className="z-[500] mt-2 flex flex-col gap-2 sm:absolute sm:inset-x-3 sm:bottom-3 sm:mt-0 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-3">
         <div className="rounded-lg border border-primary/40 bg-navy-deep/80 p-3 text-xs text-navy-foreground backdrop-blur">
           <div className="mb-2 flex items-center gap-1.5 font-semibold"><CalendarDays className="h-3.5 w-3.5 text-primary" /> الفترة</div>
           <div className="flex gap-1.5" role="tablist">
@@ -151,7 +153,7 @@ export default function HeroMapLeaflet() {
 
         <div className="flex flex-col gap-2">
           {info ? (
-            <div className="w-56 rounded-lg border border-primary/40 bg-navy-deep/85 p-3 text-xs text-navy-foreground backdrop-blur">
+            <div className="rounded-lg sm:w-56 border border-primary/40 bg-navy-deep/85 p-3 text-xs text-navy-foreground backdrop-blur">
               <div className="flex items-center gap-1.5 font-semibold">
                 {info.type === "fire" ? <Flame className="h-3.5 w-3.5 text-burn" /> : <Droplets className="h-3.5 w-3.5 text-water" />}
                 {info.name}
@@ -165,7 +167,7 @@ export default function HeroMapLeaflet() {
               <MousePointerClick className="h-3.5 w-3.5" /> اضغط على منطقة لعرض تفاصيلها
             </div>
           )}
-          <div className="w-56 rounded-lg border border-primary/40 bg-navy-deep/80 p-3 text-xs text-navy-foreground backdrop-blur">
+          <div className="rounded-lg sm:w-56 border border-primary/40 bg-navy-deep/80 p-3 text-xs text-navy-foreground backdrop-blur">
             <div className="flex items-center gap-2 py-0.5"><span className="h-3 w-4 rounded-sm bg-burn" /> حريق نشط</div>
             <div className="flex items-center gap-2 py-0.5"><span className="h-3 w-4 rounded-sm bg-water" /> فيضان</div>
             <div className="flex items-center gap-2 py-0.5"><span className="h-0 w-4 border-t-2 border-primary" /> حدود المنطقة</div>
