@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   return (
-    <SiteLayout>
+    <SiteLayout dark>
       <MapHero />
       <section id="about" className="about-scene relative scroll-mt-20 py-16 text-navy-foreground">
         <div className="mx-auto max-w-3xl px-6 text-center">

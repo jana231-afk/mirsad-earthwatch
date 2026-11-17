@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils";
 
 export const NAV = [{ to: "/about", label: "عن المشروع" }] as const;
 
-export function SiteLayout({ children }: { children: ReactNode }) {
+export function SiteLayout({ children, dark }: { children: ReactNode; dark?: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className={cn("flex min-h-screen flex-col", dark ? "bg-navy-deep" : "bg-background")}>
       <header className="sticky top-0 z-50 border-b border-navy-foreground/10 bg-navy-deep text-navy-foreground">
         <div className="mx-auto flex h-18 max-w-7xl items-center gap-6 px-6 py-3">
           <Link to="/" aria-label="مِرصاد – الرئيسية">
