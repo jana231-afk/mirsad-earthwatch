@@ -11,7 +11,7 @@ import { useDemo } from "@/lib/demo-store";
 import { canViewReport } from "@/lib/demo-rules";
 import {
   LIMITATIONS, METHODOLOGY, REPORT_TYPE_LABELS, RUN_STATUS_LABELS, TYPE_LABELS, INCIDENT_STATUS_LABELS,
-  dayLabel, formatDate, formatKm2, formatPct, formatRange, incidentStatus, type DayResult,
+  imageLabel, imagesPeriod, incidentDateText, formatDate, formatKm2, formatPct, formatRange, incidentStatus, type DayResult,
 } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_console/reports/$reportId")({
@@ -76,11 +76,12 @@ function ReportPage() {
           </div>
         </header>
         <h1 className="mt-6 text-2xl font-bold">{REPORT_TYPE_LABELS[rep.type]}: {inc.name}</h1>
+        <p className="mt-2 text-sm font-medium text-muted-foreground">فترة التقرير: {imagesPeriod(days.map((d) => d.date))}</p>
 
         <H>بيانات الحالة</H>
         <table className="w-full border text-sm"><tbody>
           <Row k="نوع الكارثة" v={TYPE_LABELS[inc.type]} />
-          <Row k="الموقع" v={`${inc.location} – ${inc.region}`} />
+          <Row k="الموقع" v={inc.location} />
           <Row k="فترة الحالة (من – إلى)" v={formatRange(inc.startDate, inc.endDate)} />
           <Row k="الحالة" v={INCIDENT_STATUS_LABELS[incidentStatus(inc, images)]} />
         </tbody></table>
@@ -105,7 +106,7 @@ function ReportPage() {
           <>
             {days.map((d, i) => (
               <section key={d.imageId} className="break-inside-avoid">
-                <H>{dayLabel(i)} – {formatDate(d.date)}</H>
+                <H>{imageLabel(i, days.length, d.date)}</H>
                 <div className="grid grid-cols-[1fr_200px] gap-4">
                   <MapViewer {...d.layers} kind={inc.type} showControls={false} showLayerPanel={false} showLegend={false} />
                   <div className="space-y-3 text-sm">
@@ -115,7 +116,7 @@ function ReportPage() {
                 </div>
               </section>
             ))}
-            <H>المقارنة بين الأيام</H>
+            <H>{days.length === 2 ? `المقارنة ${imagesPeriod(days.map((d) => d.date))}` : "المقارنة بين الصور"}</H>
             <ComparisonChart days={days} kind={inc.type} />
             <div className="mt-4"><ComparisonTable days={days} compact /></div>
             <H>ملخص التطور</H>
@@ -125,7 +126,7 @@ function ReportPage() {
 
         <H>معلومات النموذج والمراجعة</H>
         <table className="w-full border text-sm"><tbody>
-          <Row k="النموذج" v={<>{run.model} <span className="ltr">{run.modelVersion}</span>{run.experimental && " (تجريبي – قيد التحقق)"}</>} />
+          <Row k="تاريخ الحادثة" v={incidentDateText(inc)} />
           <Row k="تاريخ التحليل" v={formatDate(run.startedAt)} />
           <Row k="حالة المراجعة" v={RUN_STATUS_LABELS[run.status]} />
           <Row k="المراجع" v={`${run.reviewer ?? "—"}${run.reviewedAt ? ` – ${formatDate(run.reviewedAt)}` : ""}`} />
@@ -137,7 +138,7 @@ function ReportPage() {
         <H>القيود</H>
         <ul className="list-disc space-y-1 ps-5 text-sm text-muted-foreground">{LIMITATIONS.map((l) => <li key={l}>{l}</li>)}</ul>
         <div className="mt-6"><Notice>{AREA_DISCLAIMER}</Notice></div>
-        <footer className="mt-8 border-t pt-4 text-center text-xs text-muted-foreground">بيانات تجريبية – مشروع تخرج 2026 · مِرصاد</footer>
+        <footer className="mt-8 border-t pt-4 text-center text-xs text-muted-foreground">بيانات تجريبية · مِرصاد</footer>
       </article>
     </>
   );

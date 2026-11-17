@@ -1,9 +1,9 @@
 import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { dayChanges, dayLabel, formatDate, formatKm2, formatPct, type DayResult } from "@/lib/demo-data";
+import { dayChanges, imageLabel, formatDate, formatKm2, formatPct, type DayResult } from "@/lib/demo-data";
 import { th, td } from "./bits";
 
-/** Change chip: ▲ +x% / ▼ −x% (percentage points between consecutive days). */
+/** Change chip vs the previous image: "↓ 9.6 نقطة" (percentage points, computed from the values). */
 export function ChangeChip({ value, className }: { value: number | undefined; className?: string }) {
   if (value === undefined) return <span className="text-muted-foreground">—</span>;
   const up = value > 0.05;
@@ -18,15 +18,14 @@ export function ChangeChip({ value, className }: { value: number | undefined; cl
       )}
     >
       <Icon className="h-3 w-3" />
-      <span className="ltr font-mono">
-        {value > 0 ? "+" : ""}
-        {formatPct(value)}
+      <span>
+        <span className="ltr font-mono">{Math.abs(value).toLocaleString("en-US", { maximumFractionDigits: 1 })}</span> نقطة
       </span>
     </span>
   );
 }
 
-/** "اليوم الأول 37% ← اليوم الثاني 27.5% ← …" summary line. */
+/** "6 نوفمبر 37% ← 7 نوفمبر 27.5% ← …" summary line (labels from real image dates). */
 export function ComparisonSequence({ days }: { days: DayResult[] }) {
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
@@ -34,7 +33,7 @@ export function ComparisonSequence({ days }: { days: DayResult[] }) {
         <span key={d.imageId} className="inline-flex items-center gap-2">
           {i > 0 && <span className="text-muted-foreground">←</span>}
           <span>
-            {dayLabel(i)} <span className="ltr font-mono font-semibold">{formatPct(d.affectedPct)}</span>
+            {imageLabel(i, days.length, d.date)} <span className="ltr font-mono font-semibold">{formatPct(d.affectedPct)}</span>
           </span>
         </span>
       ))}
@@ -44,7 +43,7 @@ export function ComparisonSequence({ days }: { days: DayResult[] }) {
 
 /** One-sentence summary of the increase/decrease between first and last day. */
 export function comparisonSummary(days: DayResult[], kind: "flood" | "fire") {
-  if (days.length < 2) return "تحتوي هذه النتيجة على صورة واحدة فقط، ولا تتوفر مقارنة بين الأيام.";
+  if (days.length < 2) return "تحتوي هذه النتيجة على صورة واحدة فقط، ولا تتوفر مقارنة بين الصور.";
   const first = days[0]!;
   const last = days[days.length - 1]!;
   const diff = last.affectedPct - first.affectedPct;
@@ -57,23 +56,22 @@ export function comparisonSummary(days: DayResult[], kind: "flood" | "fire") {
 
 export function ComparisonTable({ days, compact }: { days: DayResult[]; compact?: boolean }) {
   const rows = dayChanges(days);
+  // Columns: image, area, %, change vs previous image
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead className="border-b bg-muted/50">
           <tr>
-            <th className={th}>اليوم</th>
-            <th className={th}>تاريخ الصورة</th>
+            <th className={th}>{days.length > 2 ? "الصورة وتاريخ الالتقاط" : "تاريخ الصورة"}</th>
             <th className={th}>المساحة المتأثرة</th>
             <th className={th}>النسبة المئوية</th>
-            <th className={th}>التغير عن اليوم السابق</th>
+            <th className={th}>التغير عن الصورة السابقة</th>
           </tr>
         </thead>
         <tbody className="divide-y">
           {rows.map((r, i) => (
             <tr key={r.imageId}>
-              <td className={cn(td, compact && "py-2")}>{dayLabel(i)}</td>
-              <td className={cn(td, compact && "py-2")}>{formatDate(r.date)}</td>
+              <td className={cn(td, compact && "py-2")}>{imageLabel(i, rows.length, r.date)}</td>
               <td className={cn(td, compact && "py-2")}>
                 <span className="ltr font-mono">{formatKm2(r.affectedKm2)}</span> <span className="ltr text-xs text-muted-foreground">km²</span>
               </td>
@@ -122,7 +120,7 @@ export function ComparisonChart({
               disabled={!onSelect}
               onClick={() => onSelect?.(i)}
               className="group relative z-10 flex h-full flex-1 flex-col items-center justify-end disabled:cursor-default"
-              aria-label={`${dayLabel(i)}: ${formatPct(d.affectedPct)}`}
+              aria-label={`${imageLabel(i, days.length, d.date)}: ${formatPct(d.affectedPct)}`}
             >
               <span className="ltr mb-1 font-mono text-xs font-semibold">{formatPct(d.affectedPct)}</span>
               <span
@@ -140,8 +138,8 @@ export function ComparisonChart({
       <div className="flex gap-4 px-4 pt-2">
         {days.map((d, i) => (
           <div key={d.imageId} className="flex-1 text-center text-[11px] leading-tight">
-            <div className="font-medium">{dayLabel(i)}</div>
-            <div className="text-muted-foreground">{formatDate(d.date)}</div>
+            {days.length > 2 && <div className="font-medium">الصورة {i + 1}</div>}
+            <div className={days.length > 2 ? "text-muted-foreground" : "font-medium"}>{formatDate(d.date)}</div>
           </div>
         ))}
       </div>

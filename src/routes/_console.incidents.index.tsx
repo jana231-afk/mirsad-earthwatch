@@ -87,7 +87,7 @@ function IncidentsPage() {
                     <td className={td}><TypeBadge type={i.type} /></td>
                     <td className={`${td} text-muted-foreground`}>{i.location}</td>
                     <td className={`${td} whitespace-nowrap`}>{formatDate(i.startDate)}</td>
-                    <td className={`${td} whitespace-nowrap`}>{formatDate(i.endDate)}</td>
+                    <td className={`${td} whitespace-nowrap`}>{i.endDate ? formatDate(i.endDate) : <span className="text-primary">مستمرة</span>}</td>
                     <td className={td}><IncidentStatusBadge status={s} /></td>
                     <td className={`${td} text-end`}>
                       <div className="inline-flex gap-1.5">

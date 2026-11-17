@@ -52,7 +52,7 @@ export function PageHeader({
             ))}
           </nav>
         )}
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
+        <h1 className="border-s-4 border-primary ps-3 text-2xl font-bold tracking-tight text-foreground">{title}</h1>
         {description && <div className="mt-1 max-w-3xl text-sm text-muted-foreground">{description}</div>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -122,7 +122,7 @@ export function AutoStatusNote({ className }: { className?: string }) {
 }
 
 /** "من – إلى" date range. */
-export function DateRange({ from, to, className }: { from: string; to: string; className?: string }) {
+export function DateRange({ from, to, className }: { from: string; to?: string | undefined; className?: string }) {
   return (
     <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap", className)}>
       <CalendarRange className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
@@ -160,7 +160,7 @@ export function DemoTag({ className }: { className?: string }) {
 
 export function InfoRow({ label, value, mono }: { label: string; value: ReactNode; mono?: boolean }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-dashed py-2.5 text-sm last:border-0">
+    <div className="flex items-start justify-between gap-4 border-b border-dashed py-1.5 text-sm last:border-0">
       <dt className="shrink-0 text-muted-foreground">{label}</dt>
       <dd className={cn("text-end font-medium text-foreground", mono && "ltr font-mono text-[13px]")}>{value}</dd>
     </div>

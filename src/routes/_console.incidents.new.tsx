@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { PageHeader, Panel, RoleGate } from "@/components/mirsad/bits";
 import { IncidentForm } from "@/components/mirsad/IncidentForm";
-import { demoActions, useDemo } from "@/lib/demo-store";
+import { demoActions, nowStamp, useDemo } from "@/lib/demo-store";
 
 export const Route = createFileRoute("/_console/incidents/new")({
   head: () => ({
@@ -34,7 +34,7 @@ function NewIncident() {
           onSubmit={(v) => {
             const max = incidents.reduce((m, i) => Math.max(m, Number(i.id.split("-").pop()) || 0), 0);
             const id = `INC-2026-${String(max + 1).padStart(3, "0")}`;
-            demoActions.addIncident({ id, ...v, region: v.location, createdBy: userName });
+            demoActions.addIncident({ id, ...v, createdAt: nowStamp(), createdBy: userName });
             toast.success("تم حفظ الحالة");
             navigate({ to: "/incidents/$id", params: { id } });
           }}

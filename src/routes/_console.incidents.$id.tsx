@@ -8,7 +8,7 @@ import { MapViewer } from "@/components/mirsad/MapViewer";
 import { AreaStats } from "@/components/mirsad/RunSummary";
 import { ComparisonSequence } from "@/components/mirsad/DailyComparison";
 import { incidentImages, latestReviewedRun, useDemo } from "@/lib/demo-store";
-import { IMAGE_ROLE_LABELS, daysBetween, formatDate, latestDay } from "@/lib/demo-data";
+import { IMAGE_ROLE_LABELS, daysBetween, formatDate, latestDay, weekdayName } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_console/incidents/$id")({
   head: () => ({
@@ -62,25 +62,25 @@ function IncidentDetail() {
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
-        <div className="space-y-6">
+      <div className="grid gap-4 xl:grid-cols-[360px_1fr]">
+        <div className="space-y-4">
           <Panel title="معلومات الحالة">
             <dl>
               <InfoRow label="نوع الكارثة" value={<TypeBadge type={inc.type} />} />
               <InfoRow label="الموقع" value={inc.location} />
-              <InfoRow label="المنطقة" value={inc.region} />
-              <InfoRow label="فترة الحالة (من – إلى)" value={<DateRange from={inc.startDate} to={inc.endDate} />} />
-              <InfoRow label="المدة" value={days === 1 ? "يوم واحد" : `${days} أيام`} />
+              <InfoRow label="تاريخ البداية" value={`${weekdayName(inc.startDate)} ${formatDate(inc.startDate)}`} />
+              <InfoRow label="تاريخ النهاية" value={inc.endDate ? `${weekdayName(inc.endDate)} ${formatDate(inc.endDate)}` : "مستمرة"} />
+              <InfoRow label="المدة" value={`${days === 1 ? "يوم واحد" : `${days} أيام`}${inc.endDate ? "" : " حتى الآن"}`} />
               <InfoRow label="الحالة" value={<AutoStatusBadge incident={inc} />} />
               <InfoRow label="متاحة للمستجيبين" value={inc.sharedWithResponders ? "نعم" : "لا"} />
               <InfoRow label="أنشأها" value={inc.createdBy} />
             </dl>
-            {inc.description && <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{inc.description}</p>}
-            <AutoStatusNote className="mt-4" />
+            {inc.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{inc.description}</p>}
+            <AutoStatusNote className="mt-3" />
           </Panel>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <Panel title="آخر تحليل مراجَع">
             {!reviewed ? (
               <EmptyState title="لا يوجد تحليل مراجَع بعد">شغّل التحليل ثم راجع النتيجة لاعتمادها.</EmptyState>
@@ -97,7 +97,7 @@ function IncidentDetail() {
                   <AreaStats day={latestDay(reviewed)} kind={inc.type} />
                   {reviewed.days.length > 1 && (
                     <div className="rounded-md border bg-muted/40 p-3">
-                      <div className="mb-1 text-xs font-semibold text-muted-foreground">المقارنة بين الأيام</div>
+                      <div className="mb-1 text-xs font-semibold text-muted-foreground">المقارنة بين الصور</div>
                       <ComparisonSequence days={reviewed.days} />
                     </div>
                   )}

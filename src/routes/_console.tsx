@@ -18,7 +18,7 @@ function ConsoleLayout() {
   const [mobileExpanded, setMobileExpanded] = useState(false);
   const { role, userName } = useDemo();
   return (
-    <div className="flex min-h-screen w-full">
+    <div data-role={role} className="flex min-h-screen w-full">
       <AppSidebar collapsed={isMobile ? !mobileExpanded : collapsed} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="no-print sticky top-0 z-20 flex h-16 items-center gap-3 border-b bg-card/95 px-5 backdrop-blur">

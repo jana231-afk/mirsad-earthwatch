@@ -22,6 +22,8 @@ import { Route as ConsoleDashboardRouteImport } from './routes/_console.dashboar
 import { Route as ConsoleHistoryRouteImport } from './routes/_console.history'
 import { Route as ConsoleUploadRouteImport } from './routes/_console.upload'
 import { Route as ConsoleUsersRouteImport } from './routes/_console.users'
+import { Route as LoginAdminRouteImport } from './routes/login_.admin'
+import { Route as LoginResponderRouteImport } from './routes/login_.responder'
 import { Route as ConsoleFieldIndexRouteImport } from './routes/_console.field.index'
 import { Route as ConsoleFieldIdRouteImport } from './routes/_console.field.$id'
 import { Route as ConsoleIncidentsIndexRouteImport } from './routes/_console.incidents.index'
@@ -98,6 +100,16 @@ const ConsoleUsersRoute = ConsoleUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => ConsoleRoute,
 } as any)
+const LoginAdminRoute = LoginAdminRouteImport.update({
+  id: '/login_/admin',
+  path: '/login/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginResponderRoute = LoginResponderRouteImport.update({
+  id: '/login_/responder',
+  path: '/login/responder',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConsoleFieldIndexRoute = ConsoleFieldIndexRouteImport.update({
   id: '/field/',
   path: '/field/',
@@ -168,6 +180,8 @@ export interface FileRoutesByFullPath {
   '/history': typeof ConsoleHistoryRoute
   '/upload': typeof ConsoleUploadRoute
   '/users': typeof ConsoleUsersRoute
+  '/login/admin': typeof LoginAdminRoute
+  '/login/responder': typeof LoginResponderRoute
   '/field/$id': typeof ConsoleFieldIdRoute
   '/incidents/$id': typeof ConsoleIncidentsIdRoute
   '/incidents/new': typeof ConsoleIncidentsNewRoute
@@ -193,6 +207,8 @@ export interface FileRoutesByTo {
   '/history': typeof ConsoleHistoryRoute
   '/upload': typeof ConsoleUploadRoute
   '/users': typeof ConsoleUsersRoute
+  '/login/admin': typeof LoginAdminRoute
+  '/login/responder': typeof LoginResponderRoute
   '/field/$id': typeof ConsoleFieldIdRoute
   '/incidents/$id': typeof ConsoleIncidentsIdRoute
   '/incidents/new': typeof ConsoleIncidentsNewRoute
@@ -220,6 +236,8 @@ export interface FileRoutesById {
   '/_console/history': typeof ConsoleHistoryRoute
   '/_console/upload': typeof ConsoleUploadRoute
   '/_console/users': typeof ConsoleUsersRoute
+  '/login_/admin': typeof LoginAdminRoute
+  '/login_/responder': typeof LoginResponderRoute
   '/_console/field/$id': typeof ConsoleFieldIdRoute
   '/_console/incidents/$id': typeof ConsoleIncidentsIdRoute
   '/_console/incidents/new': typeof ConsoleIncidentsNewRoute
@@ -247,6 +265,8 @@ export interface FileRouteTypes {
     | '/history'
     | '/upload'
     | '/users'
+    | '/login/admin'
+    | '/login/responder'
     | '/field/$id'
     | '/incidents/$id'
     | '/incidents/new'
@@ -272,6 +292,8 @@ export interface FileRouteTypes {
     | '/history'
     | '/upload'
     | '/users'
+    | '/login/admin'
+    | '/login/responder'
     | '/field/$id'
     | '/incidents/$id'
     | '/incidents/new'
@@ -298,6 +320,8 @@ export interface FileRouteTypes {
     | '/_console/history'
     | '/_console/upload'
     | '/_console/users'
+    | '/login_/admin'
+    | '/login_/responder'
     | '/_console/field/$id'
     | '/_console/incidents/$id'
     | '/_console/incidents/new'
@@ -321,6 +345,8 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
+  LoginAdminRoute: typeof LoginAdminRoute
+  LoginResponderRoute: typeof LoginResponderRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -415,6 +441,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/users'
       preLoaderRoute: typeof ConsoleUsersRouteImport
       parentRoute: typeof ConsoleRoute
+    }
+    '/login_/admin': {
+      id: '/login_/admin'
+      path: '/login/admin'
+      fullPath: '/login/admin'
+      preLoaderRoute: typeof LoginAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login_/responder': {
+      id: '/login_/responder'
+      path: '/login/responder'
+      fullPath: '/login/responder'
+      preLoaderRoute: typeof LoginResponderRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_console/field/': {
       id: '/_console/field/'
@@ -545,6 +585,8 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
+  LoginAdminRoute: LoginAdminRoute,
+  LoginResponderRoute: LoginResponderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

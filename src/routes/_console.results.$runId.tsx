@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_console/results/$runId")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { title: "نتائج التحليل · مِرصاد" },
-      { name: "description", content: "خريطة نتيجة التحليل والمساحة المتأثرة والمقارنة بين الأيام." },
+      { name: "description", content: "خريطة نتيجة التحليل والمساحة المتأثرة والمقارنة بين الصور." },
       { property: "og:title", content: "نتائج التحليل · مِرصاد" },
       { property: "og:description", content: "قناع التقسيم والإحصاءات والمقارنة اليومية." },
     ],
@@ -60,7 +60,7 @@ function Results() {
         </div>
       </div>
       {run.days.length > 1 && (
-        <Panel title="المقارنة بين الأيام" className="mt-6">
+        <Panel title="المقارنة بين الصور" className="mt-6">
           <div className="grid gap-6 lg:grid-cols-2">
             <ComparisonChart days={run.days} kind={inc.type} activeIndex={idx} onSelect={setDay} />
             <div className="space-y-4">

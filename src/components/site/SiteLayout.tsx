@@ -5,15 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/mirsad/Logo";
 import { cn } from "@/lib/utils";
 
-export const NAV = [
-  { to: "/", label: "الرئيسية" },
-  { to: "/about", label: "عن المشروع" },
-  { to: "/how-it-works", label: "كيف يعمل النظام" },
-  { to: "/disaster-types", label: "أنواع الكوارث" },
-  { to: "/demo-map", label: "خريطة تجريبية" },
-  { to: "/faq", label: "الأسئلة الشائعة" },
-  { to: "/contact", label: "تواصل معنا" },
-] as const;
+export const NAV = [{ to: "/about", label: "عن المشروع" }] as const;
 
 export function SiteLayout({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -79,7 +71,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           </div>
           <div>
             <div className="mb-3 text-sm font-semibold">روابط سريعة</div>
-            <ul className="grid grid-cols-2 gap-2 text-sm text-navy-muted">
+            <ul className="grid gap-2 text-sm text-navy-muted">
               {NAV.map((n) => (
                 <li key={n.to}>
                   <Link to={n.to} className="hover:text-navy-foreground">{n.label}</Link>
@@ -93,7 +85,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             <p className="mt-1">البريد: <span className="ltr">contact@mirsad.sa</span></p>
           </div>
         </div>
-        <div className="border-t border-navy-line py-4 text-center text-xs text-navy-muted">مشروع تخرج – 2026 · جميع البيانات المعروضة بيانات تجريبية</div>
+        <div className="border-t border-navy-line py-4 text-center text-xs text-navy-muted">جميع البيانات المعروضة بيانات تجريبية</div>
       </footer>
     </div>
   );

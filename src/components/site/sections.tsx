@@ -2,7 +2,7 @@ import { lazy, Suspense, useState, type ReactNode } from "react";
 import { ClientOnly, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
-  ArrowLeft, UploadCloud, Cpu, UserCheck, FileText, Waves, Flame, Hourglass, ShieldCheck, Map, Users, Target, AlertCircle, GraduationCap, Mail, Send,
+  ArrowLeft, UploadCloud, Cpu, UserCheck, FileText, Waves, Flame, Hourglass, ShieldCheck, Map, Users, Target, AlertCircle, Mail, Send,
 } from "lucide-react";
 import heroBg from "@/assets/hero-terrain.jpg";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,46 @@ import { AUTO_STATUS_RULE, ROLE_DESCRIPTIONS, ROLE_LABELS, UPCOMING_TYPES, type 
 import { cn } from "@/lib/utils";
 
 const DemoMapLeaflet = lazy(() => import("./DemoMapLeaflet"));
+const HeroMapLeaflet = lazy(() => import("./HeroMapLeaflet"));
+
+/** Home hero: headline + description beside the interactive sample map. */
+export function MapHero() {
+  const skeleton = (
+    <div className="grid h-[460px] w-full place-items-center rounded-xl border border-navy-line bg-navy text-sm text-navy-muted lg:h-[540px]">
+      <span className="flex items-center gap-2"><Map className="h-4 w-4" /> جارٍ تحميل الخريطة…</span>
+    </div>
+  );
+  return (
+    <section className="bg-navy-deep text-navy-foreground">
+      <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-14 lg:grid-cols-[0.8fr_1.2fr]">
+        <div>
+          <h1 className="text-3xl font-bold leading-[1.35] md:text-4xl">رصد الكوارث وتقييم آثارها على خريطة تفاعلية</h1>
+          <p className="mt-5 text-base leading-relaxed text-navy-foreground/85">
+            يحدد مِرصاد المناطق المتأثرة بالفيضانات وحرائق الغابات من الصور الجغرافية، ويحسب مساحتها ونسبتها، ويتابع تطورها عبر الزمن، ويصدر تقارير يراجعها المختص قبل اعتمادها.
+          </p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Button asChild size="lg"><Link to="/login">تسجيل الدخول</Link></Button>
+            <Button asChild size="lg" variant="outline" className="border-navy-line bg-transparent text-navy-foreground hover:bg-navy-line/60 hover:text-navy-foreground">
+              <Link to="/about">عن المشروع</Link>
+            </Button>
+          </div>
+          <p className="mt-6 text-xs text-navy-muted">الخريطة المعروضة معاينة ببيانات تجريبية، وليست رصداً حياً.</p>
+        </div>
+        <ClientOnly fallback={skeleton}>
+          <Suspense fallback={skeleton}><HeroMapLeaflet /></Suspense>
+        </ClientOnly>
+      </div>
+    </section>
+  );
+}
+
+/** Official project description (provided by the team). */
+export const OFFICIAL_ABOUT = [
+  "مِرصاد هو منصة إلكترونية ذكية لرصد الكوارث وتقييم آثارها، تهدف إلى دعم قرارات الدفاع المدني وتسريع الاستجابة للفيضانات وحرائق الغابات.",
+  "يحلل النظام الصور الجغرافية وصور الأقمار الصناعية لتحديد المناطق المتضررة ورسمها على خريطة تفاعلية، مع حساب المساحات ونسب الضرر واقتراح أولوية التدخل.",
+  "كما يتيح متابعة تطور الكارثة من خلال مقارنة الصور عبر فترات زمنية مختلفة، وتنظيم الحوادث وتصنيفاتها، وإصدار تقارير جاهزة يراجعها المختص قبل اعتمادها.",
+  "ويخدم مِرصاد ثلاث فئات رئيسية: محللي نظم المعلومات الجغرافية، ومديري النظام، والمستجيبين الميدانيين.",
+];
 
 export function Section({ title, kicker, more, children, muted }: { title: string; kicker?: string; more?: string; children: ReactNode; muted?: boolean }) {
   return (
@@ -41,9 +81,6 @@ export function Hero() {
       <div className="bg-login-overlay absolute inset-0" />
       <div className="relative mx-auto max-w-7xl px-6 py-28 md:py-36">
         <div className="max-w-2xl">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-navy-line bg-navy/60 px-3 py-1 text-xs text-navy-muted">
-            <GraduationCap className="h-3.5 w-3.5" /> مشروع تخرج – 2026
-          </div>
           <h1 className="text-4xl font-bold leading-[1.3] md:text-5xl">رسم وتقييم الكوارث من الصور الجغرافية</h1>
           <p className="mt-5 text-lg leading-relaxed text-navy-foreground/85">
             يساعد مِرصاد محللي نظم المعلومات الجغرافية على تحديد المناطق المتأثرة بالفيضانات والحرائق وحساب مساحتها وإصدار تقارير تقييم واضحة.
@@ -81,7 +118,7 @@ export function AboutContent({ full }: { full?: boolean }) {
       </div>
       {full && (
         <div className="mt-8 rounded-lg border bg-card p-6 text-sm leading-loose text-muted-foreground">
-          مِرصاد مشروع تخرج طوّره فريق من الطلاب. يركز على نوعين من الكوارث حالياً (الفيضانات والمناطق المحروقة)، وصُمم ليتسع لأنواع أخرى لاحقاً.
+          يركز على نوعين من الكوارث حالياً (الفيضانات والمناطق المحروقة)، وصُمم ليتسع لأنواع أخرى لاحقاً.
           النتائج تقديرات آلية تُراجع من محلل، ولا تمثل تحديداً للأضرار الفعلية على الأرض، ولا يقدم النظام تنبؤات أو مراقبة لحظية.
         </div>
       )}
@@ -178,7 +215,7 @@ export function RolesContent() {
 }
 
 const FAQ = [
-  { q: "ما هو مِرصاد؟", a: "نظام ويب لرسم وتقييم المناطق المتأثرة بالفيضانات والحرائق من الصور الجغرافية، طُوّر كمشروع تخرج." },
+  { q: "ما هو مِرصاد؟", a: "نظام ويب لرسم وتقييم المناطق المتأثرة بالفيضانات والحرائق من الصور الجغرافية." },
   { q: "ما الصور التي يقبلها النظام؟", a: "يقبل ملفات GeoTIFF التي تحتوي على نظام إحداثيات. يمكن رفع صورة واحدة أو عدة صور معاً، ويجب أن يكون لكل صورة تاريخ التقاط." },
   { q: "هل يحدد النظام الأضرار الفعلية؟", a: "لا. يحدد النظام البكسلات التي تظهر فيها مياه أو آثار احتراق ويحسب مساحتها، ولا يقدّر أضرار المباني أو السكان أو عمق المياه." },
   { q: "كيف تُحدد حالة السجل نشطة أو مغلقة؟", a: AUTO_STATUS_RULE },

@@ -235,3 +235,48 @@
     max-width: none !important;
   }
 }
+
+/*
+ * Role accent themes — the console layout and the role login views set data-role.
+ * Analyst keeps the main MIRSAD teal; admin = deep indigo, responder = muted bronze.
+ */
+[data-role="analyst"] {
+  --primary: oklch(0.62 0.11 184); /* #0F9E91 */
+  --primary-soft: oklch(0.95 0.035 184);
+  --ring: oklch(0.62 0.11 184);
+  --sidebar-primary: oklch(0.72 0.11 184);
+  --sidebar-ring: oklch(0.72 0.11 184);
+}
+[data-role="admin"] {
+  --primary: oklch(0.45 0.12 272); /* #3F4E9A */
+  --primary-foreground: oklch(0.99 0.005 272);
+  --primary-soft: oklch(0.95 0.025 272);
+  --ring: oklch(0.45 0.12 272);
+  --accent: oklch(0.95 0.025 272);
+  --accent-foreground: oklch(0.35 0.1 272);
+  --sidebar-primary: oklch(0.72 0.1 272);
+  --sidebar-ring: oklch(0.72 0.1 272);
+}
+[data-role="responder"] {
+  --primary: oklch(0.6 0.12 70); /* #B7791F */
+  --primary-foreground: oklch(0.99 0.005 70);
+  --primary-soft: oklch(0.96 0.03 75);
+  --ring: oklch(0.6 0.12 70);
+  --accent: oklch(0.96 0.03 75);
+  --accent-foreground: oklch(0.42 0.09 65);
+  --sidebar-primary: oklch(0.74 0.11 72);
+  --sidebar-ring: oklch(0.74 0.11 72);
+}
+
+/* Public hero map (reference: dark imagery with glowing outlines) */
+.hero-map .leaflet-tile-pane { filter: saturate(0.85) brightness(0.72) contrast(1.05); }
+.hero-glow-teal { filter: drop-shadow(0 0 4px var(--primary)) drop-shadow(0 0 10px var(--primary)); }
+.hero-glow-burn { filter: drop-shadow(0 0 6px var(--burn)); }
+.hero-glow-water { filter: drop-shadow(0 0 6px var(--water)); }
+.hero-pin {
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9999px;
+  font-size: 16px; background: color-mix(in oklab, var(--navy-deep) 80%, transparent);
+  border: 2px solid var(--primary); box-shadow: 0 0 12px var(--primary);
+}
+.hero-pin-fire { border-color: var(--burn); box-shadow: 0 0 12px var(--burn); }
+.hero-pin-flood { border-color: var(--water); box-shadow: 0 0 12px var(--water); }

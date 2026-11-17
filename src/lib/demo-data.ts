@@ -29,12 +29,20 @@ export interface Incident {
   id: string;
   name: string;
   type: IncidentType;
+  /** Combined readable location "المنطقة — المدينة — الحي أو الشارع" (kept for older records). */
   location: string;
+  /** المنطقة */
   region: string;
-  /** "من" — first day of the disaster (YYYY-MM-DD) */
+  /** المدينة */
+  city?: string | undefined;
+  /** الحي أو الشارع */
+  district?: string | undefined;
+  /** Actual day the disaster began (YYYY-MM-DD) — not the record creation date. */
   startDate: string;
-  /** "إلى" — last day of the disaster; equals startDate for a one-day disaster */
-  endDate: string;
+  /** Last day of the disaster; undefined while the disaster is ongoing ("مستمرة"). */
+  endDate?: string | undefined;
+  /** When the record was entered into the system (separate from startDate). */
+  createdAt?: string | undefined;
   description: string;
   createdBy: string;
   sharedWithResponders: boolean;
@@ -168,7 +176,7 @@ export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
 
 export const REPORT_TYPE_DESCRIPTIONS: Record<ReportType, string> = {
   disaster: "التحليل الكامل للحالة: بيانات الحالة والصور، خريطة التحليل، المساحة المتأثرة ونسبتها، معلومات النموذج وحالة المراجعة.",
-  progress: "مقارنة الصور المحللة عبر الأيام: قسم لكل تاريخ، جدول ورسم بياني للمقارنة، وملخص للزيادة أو النقص بين الأيام.",
+  progress: "مقارنة الصور المحللة عبر الأيام: قسم لكل تاريخ، جدول ورسم بياني للمقارنة، وملخص للزيادة أو النقص بين الصور.",
 };
 
 export const SENSORS = ["بصرية متعددة النطاقات", "رادارية", "جوية عالية الدقة", "غير معروف"];
@@ -205,7 +213,8 @@ export function formatDate(iso: string) {
 }
 
 /** Date range "من – إلى". Same day → "14 – 14 سبتمبر 2026". */
-export function formatRange(from: string, to: string) {
+export function formatRange(from: string, to?: string) {
+  if (!to) return `${formatDate(from)} — مستمرة`;
   const [fy, fm, fd] = from.split("-");
   const [ty, tm, td] = to.split("-");
   if (!fy || !fm || !fd || !ty || !tm || !td) return `${from} – ${to}`;
@@ -214,7 +223,7 @@ export function formatRange(from: string, to: string) {
   return `${formatDate(from)} – ${formatDate(to)}`;
 }
 
-export function daysBetween(from: string, to: string) {
+export function daysBetween(from: string, to: string = todayISO()) {
   return Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000) + 1;
 }
 
@@ -225,6 +234,7 @@ export function daysBetween(from: string, to: string) {
  * no new image it becomes "closed". Adding a newer image re-activates it.
  */
 export function lastActivityDate(incident: Incident, images: GeoImage[]) {
+  if (!incident.endDate) return "9999-12-31"; // ongoing — stays active until an end date is added
   let last = incident.endDate;
   for (const img of images) {
     if (img.incidentId !== incident.id) continue;
@@ -270,9 +280,42 @@ export function dayChanges(days: DayResult[]) {
   });
 }
 
-export function dayLabel(index: number) {
-  const names = ["اليوم الأول", "اليوم الثاني", "اليوم الثالث", "اليوم الرابع", "اليوم الخامس", "اليوم السادس", "اليوم السابع"];
-  return names[index] ?? `اليوم ${index + 1}`;
+const WEEKDAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+
+/** "2026-11-12" → "الخميس" */
+export function weekdayName(iso: string) {
+  const t = Date.parse(`${iso.slice(0, 10)}T12:00:00Z`);
+  return Number.isNaN(t) ? "" : WEEKDAYS[new Date(t).getUTCDay()]!;
+}
+
+/** "من X إلى Y" using full dates. */
+export function fromTo(from: string, to: string) {
+  return `من ${formatDate(from)} إلى ${formatDate(to)}`;
+}
+
+/**
+ * Label for image `index` among `total` images, based on real acquisition dates:
+ * more than two → "الصورة 1 — 6 نوفمبر 2026"; one or two → the date only (never numbered).
+ */
+export function imageLabel(index: number, total: number, date: string) {
+  return total > 2 ? `الصورة ${index + 1} — ${formatDate(date)}` : formatDate(date);
+}
+
+/** Period covered by a set of images: "من [أول صورة] إلى [آخر صورة]" (same date twice for one day). */
+export function imagesPeriod(dates: string[]) {
+  const sorted = [...dates].sort();
+  if (!sorted.length) return "";
+  return fromTo(sorted[0]!, sorted[sorted.length - 1]!);
+}
+
+/** Incident date for reports: "من البداية إلى النهاية" or "البداية — مستمرة". */
+export function incidentDateText(i: Pick<Incident, "startDate" | "endDate">) {
+  return i.endDate ? fromTo(i.startDate, i.endDate) : `${formatDate(i.startDate)} — مستمرة`;
+}
+
+/** "منطقة مكة المكرمة — جدة — حي الروضة" */
+export function joinLocation(region: string, city?: string, district?: string) {
+  return [region, city, district].map((x) => x?.trim()).filter(Boolean).join(" — ");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -281,13 +324,28 @@ export function dayLabel(index: number) {
 
 export const INCIDENTS: Incident[] = [
   {
+    id: "INC-2026-020",
+    name: "حريق غابات تنومة",
+    type: "fire",
+    location: "منطقة عسير — تنومة — منتزه الجرة",
+    region: "منطقة عسير",
+    city: "تنومة",
+    district: "منتزه الجرة",
+    startDate: "2026-11-12",
+    createdAt: "2026-11-15 09:30",
+    description: "حريق في الغطاء الشجري على المنحدرات الشرقية لمنتزه الجرة بدأ يوم الخميس، ولم يُعلن إخماده بعد. بانتظار رفع الصور الجغرافية.",
+    createdBy: "فيصل الغامدي",
+    sharedWithResponders: false,
+  },
+  {
     id: "INC-2026-019",
     name: "سيول وادي الأخضر",
     type: "flood",
-    location: "تبوك",
+    location: "منطقة تبوك — تبوك — وادي الأخضر",
     region: "منطقة تبوك",
+    city: "تبوك",
+    district: "وادي الأخضر",
     startDate: "2026-11-08",
-    endDate: "2026-11-11",
     description: "أمطار غزيرة أدت إلى جريان الوادي وتجمع المياه في الأراضي الزراعية المجاورة. بانتظار رفع الصور الجغرافية.",
     createdBy: "نورة العتيبي",
     sharedWithResponders: false,
@@ -296,10 +354,11 @@ export const INCIDENTS: Incident[] = [
     id: "INC-2026-018",
     name: "سيول وادي فاطمة",
     type: "flood",
-    location: "الجموم، مكة المكرمة",
+    location: "منطقة مكة المكرمة — الجموم — شمال الجموم – مزارع وادي فاطمة",
     region: "منطقة مكة المكرمة",
+    city: "الجموم",
+    district: "شمال الجموم – مزارع وادي فاطمة",
     startDate: "2026-11-05",
-    endDate: "2026-11-10",
     description: "جريان سيول وادي فاطمة بعد أمطار غزيرة على عدة أيام، مع غمر أجزاء من المزارع والطرق الفرعية شمال الجموم. تُرفع صورة لكل يوم لمتابعة انحسار المياه.",
     createdBy: "نورة العتيبي",
     sharedWithResponders: true,
@@ -308,8 +367,10 @@ export const INCIDENTS: Incident[] = [
     id: "INC-2026-016",
     name: "حريق غابات السودة",
     type: "fire",
-    location: "السودة، أبها",
+    location: "منطقة عسير — أبها — السودة",
     region: "منطقة عسير",
+    city: "أبها",
+    district: "السودة",
     startDate: "2026-09-14",
     endDate: "2026-09-15",
     description: "حريق في غطاء أشجار العرعر على المنحدرات الجنوبية الغربية. تم إخماده بعد يومين، والمطلوب تقدير المساحة المحروقة.",
@@ -320,8 +381,10 @@ export const INCIDENTS: Incident[] = [
     id: "INC-2026-015",
     name: "سيول صبيا",
     type: "flood",
-    location: "صبيا، جازان",
+    location: "منطقة جازان — صبيا — شرق المدينة",
     region: "منطقة جازان",
+    city: "صبيا",
+    district: "شرق المدينة",
     startDate: "2026-08-30",
     endDate: "2026-08-30",
     description: "ارتفاع منسوب وادي صبيا وتجمع المياه في المناطق المنخفضة شرق المدينة خلال يوم واحد.",
@@ -332,8 +395,10 @@ export const INCIDENTS: Incident[] = [
     id: "INC-2026-012",
     name: "حريق غابة رغدان",
     type: "fire",
-    location: "رغدان، الباحة",
+    location: "منطقة الباحة — الباحة — رغدان",
     region: "منطقة الباحة",
+    city: "الباحة",
+    district: "رغدان",
     startDate: "2026-07-11",
     endDate: "2026-07-11",
     description: "حريق محدود في الأطراف الشمالية لغابة رغدان.",
@@ -344,8 +409,10 @@ export const INCIDENTS: Incident[] = [
     id: "INC-2026-010",
     name: "سيول شرق جدة",
     type: "flood",
-    location: "شرق الخط السريع، جدة",
+    location: "منطقة مكة المكرمة — جدة — حي الروضة",
     region: "منطقة مكة المكرمة",
+    city: "جدة",
+    district: "حي الروضة",
     startDate: "2026-04-17",
     endDate: "2026-04-18",
     description: "تجمع مياه الأمطار في الأحياء الواقعة شرق طريق الحرمين.",
@@ -356,8 +423,10 @@ export const INCIDENTS: Incident[] = [
     id: "INC-2026-007",
     name: "فيضان وادي حنيفة",
     type: "flood",
-    location: "العمارية، الرياض",
+    location: "منطقة الرياض — الرياض — العمارية",
     region: "منطقة الرياض",
+    city: "الرياض",
+    district: "العمارية",
     startDate: "2026-03-05",
     endDate: "2026-03-05",
     description: "جريان وادي حنيفة وغمر أجزاء من الممرات والمزارع على ضفتيه.",
@@ -368,8 +437,10 @@ export const INCIDENTS: Incident[] = [
     id: "INC-2026-004",
     name: "حريق مراعي الشفا",
     type: "fire",
-    location: "الشفا، الطائف",
+    location: "منطقة مكة المكرمة — الطائف — الشفا",
     region: "منطقة مكة المكرمة",
+    city: "الطائف",
+    district: "الشفا",
     startDate: "2026-02-09",
     endDate: "2026-02-10",
     description: "حريق في الغطاء العشبي والشجيرات على مرتفعات الشفا.",
