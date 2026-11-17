@@ -5,6 +5,7 @@ import {
   ArrowLeft, UploadCloud, Cpu, UserCheck, FileText, Waves, Flame, Hourglass, ShieldCheck, Map, Users, Target, AlertCircle, Mail, Send,
 } from "lucide-react";
 import heroBg from "@/assets/hero-terrain.jpg";
+import heroMapImg from "@/assets/hero-disaster-map.jpg";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { DemoTag, ExperimentalBadge } from "@/components/mirsad/bits";
@@ -12,34 +13,23 @@ import { AUTO_STATUS_RULE, ROLE_DESCRIPTIONS, ROLE_LABELS, UPCOMING_TYPES, type 
 import { cn } from "@/lib/utils";
 
 const DemoMapLeaflet = lazy(() => import("./DemoMapLeaflet"));
-const HeroMapLeaflet = lazy(() => import("./HeroMapLeaflet"));
 
-/** Home hero: headline + description beside the interactive sample map. */
+/** Home hero: headline + two buttons beside a static illustrative map image. */
 export function MapHero() {
-  const skeleton = (
-    <div className="grid h-[460px] w-full place-items-center rounded-xl border border-navy-line bg-navy text-sm text-navy-muted lg:h-[540px]">
-      <span className="flex items-center gap-2"><Map className="h-4 w-4" /> جارٍ تحميل الخريطة…</span>
-    </div>
-  );
   return (
     <section className="bg-navy-deep text-navy-foreground">
-      <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-14 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-14 lg:grid-cols-[0.75fr_1.25fr]">
         <div>
-          <h1 className="text-3xl font-bold leading-[1.35] md:text-4xl">رصد الكوارث وتقييم آثارها على خريطة تفاعلية</h1>
-          <p className="mt-5 text-base leading-relaxed text-navy-foreground/85">
-            يحدد مِرصاد المناطق المتأثرة بالفيضانات وحرائق الغابات من الصور الجغرافية، ويحسب مساحتها ونسبتها، ويتابع تطورها عبر الزمن، ويصدر تقارير يراجعها المختص قبل اعتمادها.
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
+          <h1 className="text-3xl font-bold leading-[1.35] md:text-5xl md:leading-[1.3]">رصد وتقييم الكوارث من الصور الجغرافية</h1>
+          <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg"><Link to="/login">تسجيل الدخول</Link></Button>
             <Button asChild size="lg" variant="outline" className="border-navy-line bg-transparent text-navy-foreground hover:bg-navy-line/60 hover:text-navy-foreground">
               <Link to="/about">عن المشروع</Link>
             </Button>
           </div>
-          <p className="mt-6 text-xs text-navy-muted">الخريطة المعروضة معاينة ببيانات تجريبية، وليست رصداً حياً.</p>
         </div>
-        <ClientOnly fallback={skeleton}>
-          <Suspense fallback={skeleton}><HeroMapLeaflet /></Suspense>
-        </ClientOnly>
+        <img src={heroMapImg} alt="منظر لمنطقة متأثرة بحريق غابات وفيضان" width={992} height={672}
+          className="h-auto w-full rounded-xl border border-navy-line object-cover shadow-2xl" />
       </div>
     </section>
   );
