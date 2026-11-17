@@ -67,7 +67,7 @@ function UsersPage() {
     <>
       <PageHeader title="إدارة المستخدمين" description="إدارة حسابات المستخدمين وتعيين الأدوار الثلاثة في النظام." />
 
-      <div className="mb-6 grid gap-4 md:grid-cols-3">
+      <div className="mb-8 grid gap-4 md:grid-cols-3">
         {(Object.keys(ROLE_DESC) as Role[]).map((r) => {
           const Icon = ROLE_DESC[r].icon;
           return (
@@ -83,7 +83,7 @@ function UsersPage() {
         })}
       </div>
 
-        <Panel title="إضافة مستخدم" className="mx-auto mb-6 w-full max-w-[560px]" bodyClassName="p-4">
+        <Panel title="إضافة مستخدم" className="mx-auto mb-8 w-full max-w-[660px]" bodyClassName="p-4">
           <form onSubmit={add} className="space-y-3" noValidate>
             <div className="space-y-1">
               <label htmlFor="user-name" className="text-sm font-medium">الاسم الكامل</label>
