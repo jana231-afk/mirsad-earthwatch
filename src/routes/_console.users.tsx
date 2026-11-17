@@ -83,32 +83,7 @@ function UsersPage() {
         })}
       </div>
 
-        <Panel title="إضافة مستخدم" className="mx-auto mb-8 w-full max-w-[660px]" bodyClassName="p-4">
-          <form onSubmit={add} className="space-y-3" noValidate>
-            <div className="space-y-1">
-              <label htmlFor="user-name" className="text-sm font-medium">الاسم الكامل</label>
-              <input id="user-name" value={name} onChange={(e) => setName(e.target.value)} className="field" maxLength={80} />
-            </div>
-            <div className="space-y-1">
-              <label htmlFor="user-email" className="text-sm font-medium">البريد الإلكتروني</label>
-              <input id="user-email" value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" className="field text-start" placeholder="user@mirsad.sa" maxLength={120} />
-            </div>
-            <div className="space-y-1">
-              <label htmlFor="user-role" className="text-sm font-medium">الدور</label>
-              <select id="user-role" value={role} onChange={(e) => setRole(e.target.value as Role)} className="field">
-                {(Object.keys(ROLE_LABELS) as Role[]).map((r) => (
-                  <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-                ))}
-              </select>
-            </div>
-            {err && <p className="text-xs text-destructive">{err}</p>}
-            <Button type="submit" className="w-full">
-              <UserPlus /> إنشاء الحساب
-            </Button>
-            <p className="text-[11px] text-muted-foreground">حساب تجريبي؛ كلمة المرور <span className="ltr">demo1234</span>. لا تُرسل رسائل بريد.</p>
-          </form>
-        </Panel>
-        <Panel title="الحسابات" bodyClassName="p-0">
+        <Panel title="الحسابات" className="mb-8" bodyClassName="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="border-b bg-muted/50">
@@ -159,6 +134,31 @@ function UsersPage() {
               </tbody>
             </table>
           </div>
+        </Panel>
+        <Panel title="إضافة مستخدم" className="mx-auto mb-8 w-full max-w-[660px]" bodyClassName="p-4">
+          <form onSubmit={add} className="space-y-3" noValidate>
+            <div className="space-y-1">
+              <label htmlFor="user-name" className="text-sm font-medium">الاسم الكامل</label>
+              <input id="user-name" value={name} onChange={(e) => setName(e.target.value)} className="field" maxLength={80} />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="user-email" className="text-sm font-medium">البريد الإلكتروني</label>
+              <input id="user-email" value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" className="field text-start" placeholder="user@mirsad.sa" maxLength={120} />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="user-role" className="text-sm font-medium">الدور</label>
+              <select id="user-role" value={role} onChange={(e) => setRole(e.target.value as Role)} className="field">
+                {(Object.keys(ROLE_LABELS) as Role[]).map((r) => (
+                  <option key={r} value={r}>{ROLE_LABELS[r]}</option>
+                ))}
+              </select>
+            </div>
+            {err && <p className="text-xs text-destructive">{err}</p>}
+            <Button type="submit" className="w-full">
+              <UserPlus /> إنشاء الحساب
+            </Button>
+            <p className="text-[11px] text-muted-foreground">حساب تجريبي؛ كلمة المرور <span className="ltr">demo1234</span>. لا تُرسل رسائل بريد.</p>
+          </form>
         </Panel>
 
     </>
