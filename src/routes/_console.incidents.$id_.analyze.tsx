@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Play, Cpu, CheckCircle2, Loader2, Clock, Eye, Info } from "lucide-react";
+import { Play, Cpu, CheckCircle2, Loader2, Clock, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { PageHeader, Panel, RoleGate, EmptyState, ExperimentalBadge, Notice, TypeBadge } from "@/components/mirsad/bits";
+import { PageHeader, Panel, RoleGate, EmptyState, ExperimentalBadge, TypeBadge } from "@/components/mirsad/bits";
 import { BinaryMask } from "@/components/mirsad/MapViewer";
 import { demoActions, incidentImages, nextId, nowStamp, useDemo } from "@/lib/demo-store";
 import { FIRE_MODEL, FLOOD_MODEL, IMAGE_ROLE_LABELS, formatDate, formatPct, simulateDays, type DayResult, type GeoImage } from "@/lib/demo-data";
@@ -173,11 +173,6 @@ function AnalyzePage() {
             </Button>
             {!canRun && <p className="mt-2 text-xs text-muted-foreground">{isFire ? "اختر صورة قبل الحدث ثم صورة بتاريخ أحدث بعده، والصور اللاحقة بعد تاريخها." : "اختر صورة صالحة واحدة على الأقل."}</p>}
           </Panel>
-          <Notice tone="info" icon={<Info className="h-4 w-4" />}>
-            {isFire
-              ? "يحدد النموذج المناطق المحروقة بمقارنة صورة ما قبل الحدث بالصور اللاحقة، ولا يكشف اللهب النشط ولا يتنبأ بانتشار الحريق."
-              : "يحدد النموذج المياه في كل صورة على حدة، ولا يقدّر عمق المياه ولا يتنبأ بالفيضانات."}
-          </Notice>
         </div>
       </div>
     </>

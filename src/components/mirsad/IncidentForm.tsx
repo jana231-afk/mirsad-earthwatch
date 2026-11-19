@@ -1,8 +1,8 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { Save, Waves, Flame, Hourglass } from "lucide-react";
+import { Save, Waves, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { UPCOMING_TYPES, daysBetween, joinLocation, todayISO, weekdayName, type Incident, type IncidentType } from "@/lib/demo-data";
+import { daysBetween, joinLocation, todayISO, weekdayName, type Incident, type IncidentType } from "@/lib/demo-data";
 
 export interface IncidentFormValues {
   name: string;
@@ -83,13 +83,6 @@ export function IncidentForm({ initial, onSubmit, onCancel }: { initial?: Incide
               </button>
             );
           })}
-          {UPCOMING_TYPES.map((t) => (
-            <button key={t} type="button" disabled className="flex cursor-not-allowed items-center gap-3 rounded-md border border-dashed bg-muted/40 px-3 py-2 text-start text-sm text-muted-foreground">
-              <Hourglass className="h-4 w-4" />
-              <span>{t}</span>
-              <span className="ms-auto rounded bg-secondary px-1.5 py-0.5 text-[11px]">قريباً</span>
-            </button>
-          ))}
         </div>
       </Field>
 
