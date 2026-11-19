@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { UploadCloud, Play, FileText, Pencil, Eye, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  PageHeader, Panel, RoleGate, EmptyState, TypeBadge, AutoStatusBadge, AutoStatusNote, DateRange, InfoRow, RunStatusBadge, ExperimentalBadge, th, td,
+  PageHeader, Panel, RoleGate, EmptyState, TypeBadge, AutoStatusBadge, DateRange, InfoRow, RunStatusBadge, ExperimentalBadge, th, td,
 } from "@/components/mirsad/bits";
 import { MapViewer } from "@/components/mirsad/MapViewer";
 import { AreaStats } from "@/components/mirsad/RunSummary";
@@ -76,7 +76,6 @@ function IncidentDetail() {
               <InfoRow label="أنشأها" value={inc.createdBy} />
             </dl>
             {inc.description && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{inc.description}</p>}
-            <AutoStatusNote className="mt-3" />
           </Panel>
         </div>
 

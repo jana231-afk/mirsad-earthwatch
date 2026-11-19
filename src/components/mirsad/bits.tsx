@@ -1,11 +1,10 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Flame, Lock, Waves, FlaskConical, Database, CalendarRange, Info } from "lucide-react";
+import { Flame, Lock, Waves, FlaskConical, Database, CalendarRange } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  AUTO_STATUS_RULE,
   INCIDENT_STATUS_LABELS,
   ROLE_HOME,
   RUN_STATUS_LABELS,
@@ -109,16 +108,6 @@ export function IncidentStatusBadge({ status }: { status: IncidentStatus }) {
 export function AutoStatusBadge({ incident }: { incident: Incident }) {
   const { images } = useDemo();
   return <IncidentStatusBadge status={incidentStatus(incident, images)} />;
-}
-
-/** Small note explaining the automatic active/closed rule. */
-export function AutoStatusNote({ className }: { className?: string }) {
-  return (
-    <div className={cn("flex gap-2 rounded-md border border-info/20 bg-info-soft px-3 py-2 text-xs leading-relaxed text-foreground/80", className)}>
-      <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info" />
-      <span>{AUTO_STATUS_RULE}</span>
-    </div>
-  );
 }
 
 /** "من – إلى" date range. */

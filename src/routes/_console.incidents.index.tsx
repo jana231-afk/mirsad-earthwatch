@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Plus, Search, Eye, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageHeader, Panel, RoleGate, TypeBadge, IncidentStatusBadge, AutoStatusNote, EmptyState, th, td } from "@/components/mirsad/bits";
+import { PageHeader, Panel, RoleGate, TypeBadge, IncidentStatusBadge, EmptyState, th, td } from "@/components/mirsad/bits";
 import { useDemo } from "@/lib/demo-store";
 import { formatDate, incidentStatus, type IncidentStatus, type IncidentType } from "@/lib/demo-data";
 
@@ -59,7 +59,6 @@ function IncidentsPage() {
               <option value="closed">مغلقة</option>
             </select>
           </div>
-          <AutoStatusNote />
         </div>
         {rows.length === 0 ? (
           <div className="p-6"><EmptyState title="لا توجد نتائج مطابقة" /></div>
