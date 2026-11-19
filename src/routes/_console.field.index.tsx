@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye } from "lucide-react";
+import { useState } from "react";
+import { Eye, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader, Panel, RoleGate, TypeBadge, AutoStatusBadge, DateRange, EmptyState, th, td } from "@/components/mirsad/bits";
 import { latestReviewedRun, useDemo } from "@/lib/demo-store";
-import { formatKm2, formatPct, latestDay } from "@/lib/demo-data";
+import { formatKm2, formatPct, incidentStatus, latestDay, type IncidentStatus, type IncidentType } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/_console/field/")({
   head: () => ({
@@ -20,13 +21,37 @@ export const Route = createFileRoute("/_console/field/")({
 });
 
 function FieldList() {
-  const { incidents, runs } = useDemo();
-  const rows = incidents.filter((i) => i.sharedWithResponders);
+  const { incidents, runs, images } = useDemo();
+  const [q, setQ] = useState("");
+  const [type, setType] = useState<"all" | IncidentType>("all");
+  const [status, setStatus] = useState<"all" | IncidentStatus>("all");
+  const rows = incidents
+    .filter((i) => i.sharedWithResponders)
+    .filter((i) => (!q.trim() || i.name.includes(q.trim())) && (type === "all" || i.type === type) && (status === "all" || incidentStatus(i, images) === status))
+    .sort((a, b) => b.startDate.localeCompare(a.startDate));
   return (
     <>
       <PageHeader title="الحالات المصرح بها" description="عرض للقراءة فقط. تظهر هنا النتائج المراجَعة فقط." />
       <Panel bodyClassName="p-0">
-        {rows.length === 0 ? <div className="p-5"><EmptyState title="لا توجد حالات مصرح بها" /></div> : (
+        <div className="border-b p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative min-w-60 flex-1">
+              <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="البحث باسم الحالة" className="field ps-9" />
+            </div>
+            <select value={type} onChange={(e) => setType(e.target.value as typeof type)} className="field w-40" aria-label="نوع الكارثة">
+              <option value="all">كل الأنواع</option>
+              <option value="flood">فيضان</option>
+              <option value="fire">حريق</option>
+            </select>
+            <select value={status} onChange={(e) => setStatus(e.target.value as typeof status)} className="field w-40" aria-label="الحالة">
+              <option value="all">كل الحالات</option>
+              <option value="active">نشطة</option>
+              <option value="closed">مغلقة</option>
+            </select>
+          </div>
+        </div>
+        {rows.length === 0 ? <div className="p-5"><EmptyState title="لا توجد حالات مطابقة" /></div> : (
           <div className="overflow-x-auto"><table className="w-full">
             <thead className="border-b bg-muted/50"><tr>{["الحالة", "نوع الكارثة", "الموقع", "الفترة", "الحالة", "آخر نتيجة مراجَعة", ""].map((h, k) => <th key={k} className={th}>{h}</th>)}</tr></thead>
             <tbody className="divide-y">
