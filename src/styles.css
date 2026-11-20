@@ -223,6 +223,11 @@
   unicode-bidi: isolate;
 }
 
+/* Keep RTL off-screen content from shifting the export dialog's visual viewport. */
+html:has([data-map-export]), body:has([data-map-export]) {
+  overflow-x: clip;
+}
+
 @media print {
   .no-print {
     display: none !important;

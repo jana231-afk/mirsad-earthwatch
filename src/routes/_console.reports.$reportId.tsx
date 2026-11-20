@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RoleGate, EmptyState, Notice } from "@/components/mirsad/bits";
 import { LogoMark } from "@/components/mirsad/Logo";
 import { MapViewer, MapLegend } from "@/components/mirsad/MapViewer";
+import { ExportImage } from "@/components/mirsad/ExportImage";
 import { AREA_DISCLAIMER } from "@/components/mirsad/RunSummary";
 import { ComparisonChart, ComparisonTable, comparisonSummary } from "@/components/mirsad/DailyComparison";
 import { useDemo } from "@/lib/demo-store";
@@ -61,7 +62,10 @@ function ReportPage() {
     <>
       <div className="no-print mb-5 flex flex-wrap items-center justify-between gap-3">
         <Button asChild variant="ghost"><Link to="/reports" search={{}}><ArrowRight /> العودة إلى التقارير</Link></Button>
-        <Button onClick={() => window.print()}><Download /> تحميل PDF</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={() => window.print()}><Download /> تحميل PDF</Button>
+          <ExportImage incidentId={inc.id} runId={run.id} imageId={last.imageId} />
+        </div>
       </div>
       <article className="print-sheet mx-auto max-w-[860px] rounded-lg border bg-card p-4 sm:p-10 shadow-panel">
         <header className="flex items-start justify-between gap-4 border-b pb-5">

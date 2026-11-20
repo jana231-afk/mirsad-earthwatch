@@ -7,6 +7,7 @@ import { AreaStats, RunInfo, AREA_DISCLAIMER } from "@/components/mirsad/RunSumm
 import { ComparisonChart, ComparisonSequence, ComparisonTable, comparisonSummary } from "@/components/mirsad/DailyComparison";
 import { DayTabs } from "@/components/mirsad/DayTabs";
 import { useDemo } from "@/lib/demo-store";
+import { ExportImage } from "@/components/mirsad/ExportImage";
 
 export const Route = createFileRoute("/_console/results/$runId")({
   validateSearch: (s: Record<string, unknown>): { day?: number | undefined } => ({
@@ -34,7 +35,8 @@ function Results() {
   const inc = run && incidents.find((i) => i.id === run.incidentId);
   if (!run || !inc) return <EmptyState title="التحليل غير موجود" />;
   const idx = Math.min(Math.max(day ?? run.days.length - 1, 0), run.days.length - 1);
-  const d = run.days[idx]!;
+   const d = run.days[idx];
+   if (!d) return <EmptyState title="لا توجد نتيجة للتحليل" />;
   const setDay = (i: number) => navigate({ search: { day: i }, replace: true });
   const preImg = images.find((m) => run.imageIds.includes(m.id) && m.imageRole === "pre");
 
@@ -45,7 +47,7 @@ function Results() {
         crumbs={[{ label: "سجل التحليلات", to: "/history" }, { label: inc.name, to: "/incidents/$id", params: { id: inc.id } }, { label: run.id }]}
         description={<span className="flex flex-wrap items-center gap-2">{inc.name} <TypeBadge type={inc.type} /> <RunStatusBadge status={run.status} /> {run.experimental && <ExperimentalBadge />}</span>}
         actions={run.status === "reviewed"
-          ? <Button asChild><Link to="/reports" search={{ incident: inc.id }}><FileText /> إنشاء تقرير</Link></Button>
+          ? <><Button asChild><Link to="/reports" search={{ incident: inc.id }}><FileText /> إنشاء تقرير</Link></Button><ExportImage incidentId={inc.id} runId={run.id} imageId={d.imageId} /></>
           : <Button asChild variant="navy"><Link to="/review/$runId" params={{ runId }}><ClipboardCheck /> مراجعة النتيجة</Link></Button>}
       />
       <div className="mb-4"><DayTabs days={run.days} value={idx} onChange={setDay} /></div>

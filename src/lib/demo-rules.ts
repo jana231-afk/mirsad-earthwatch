@@ -1,6 +1,11 @@
 import type { AnalysisRun, GeoImage, Incident, Report, Role } from "./demo-data";
 
 /** Presentation access rules for the backend-free prototype, not server authorization. */
+export function canExportAnalysis(role: Role, incident: Incident, run: AnalysisRun) {
+  return run.incidentId === incident.id && run.status === "reviewed" && run.days.length > 0 &&
+    (role === "analyst" || (role === "responder" && incident.sharedWithResponders));
+}
+
 export function canViewReport(role: Role, report: Report, incidents: Incident[], runs: AnalysisRun[]) {
   const incident = incidents.find((item) => item.id === report.incidentId);
   const run = runs.find((item) => item.id === report.runId && item.incidentId === report.incidentId);

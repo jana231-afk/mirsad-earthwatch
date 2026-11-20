@@ -10,6 +10,7 @@ import { DayTabs } from "@/components/mirsad/DayTabs";
 import { latestReviewedRun, useDemo } from "@/lib/demo-store";
 import { REPORT_TYPE_LABELS, formatDate } from "@/lib/demo-data";
 import { canViewReport } from "@/lib/demo-rules";
+import { ExportImage } from "@/components/mirsad/ExportImage";
 
 export const Route = createFileRoute("/_console/field/$id")({
   head: () => ({
@@ -37,7 +38,8 @@ function FieldDetail() {
   return (
     <>
       <PageHeader title={inc.name} crumbs={[{ label: "الحالات المصرح بها", to: "/field" }, { label: inc.name }]}
-        description={<span className="flex flex-wrap items-center gap-2"><TypeBadge type={inc.type} /><AutoStatusBadge incident={inc} /></span>} />
+        description={<span className="flex flex-wrap items-center gap-2"><TypeBadge type={inc.type} /><AutoStatusBadge incident={inc} /></span>}
+        actions={run && d ? <ExportImage incidentId={inc.id} runId={run.id} imageId={d.imageId} /> : undefined} />
       <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
         <div className="space-y-6">
           {!run || !d ? <EmptyState title="لا توجد نتيجة مراجَعة بعد" /> : (
@@ -67,9 +69,10 @@ function FieldDetail() {
                 <li key={r.id} className="rounded-md border p-3 text-sm">
                   <div className="font-medium">{REPORT_TYPE_LABELS[r.type]}</div>
                   <div className="text-xs text-muted-foreground"><span className="ltr">{r.id}</span> · {formatDate(r.createdAt)}</div>
-                  <div className="mt-2 flex gap-1.5">
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     <Button asChild size="sm" variant="outline"><Link to="/reports/$reportId" params={{ reportId: r.id }}><FileText /> عرض</Link></Button>
                     <Button asChild size="sm" variant="soft"><Link to="/reports/$reportId" params={{ reportId: r.id }} search={{ download: true }}><Download /> تحميل PDF</Link></Button>
+                    <ExportImage incidentId={inc.id} runId={r.runId} {...(r.imageIds.at(-1) ? { imageId: r.imageIds.at(-1) as string } : {})} size="sm" />
                   </div>
                 </li>))}</ul>
             )}

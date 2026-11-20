@@ -9,6 +9,7 @@ import { demoActions, latestReviewedRun, nextId, nowStamp, useDemo } from "@/lib
 import { REPORT_TYPE_DESCRIPTIONS, REPORT_TYPE_LABELS, formatDate, type ReportType } from "@/lib/demo-data";
 import { cn } from "@/lib/utils";
 import { canViewReport } from "@/lib/demo-rules";
+import { ExportImage } from "@/components/mirsad/ExportImage";
 
 export const Route = createFileRoute("/_console/reports/")({
   validateSearch: (s: Record<string, unknown>): { incident?: string | undefined } => ({
@@ -64,6 +65,7 @@ function Reports() {
                     <td className={`${td} text-end`}><div className="inline-flex gap-1.5">
                       <Button asChild size="sm" variant="outline"><Link to="/reports/$reportId" params={{ reportId: r.id }}><FileText /> معاينة</Link></Button>
                       <Button asChild size="sm" variant="soft"><Link to="/reports/$reportId" params={{ reportId: r.id }} search={{ download: true }}><Download /> تحميل PDF</Link></Button>
+                      <ExportImage incidentId={r.incidentId} runId={r.runId} {...(r.imageIds.at(-1) ? { imageId: r.imageIds.at(-1) as string } : {})} size="sm" />
                     </div></td>
                   </tr>
                 );
