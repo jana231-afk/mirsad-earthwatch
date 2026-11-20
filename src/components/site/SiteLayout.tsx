@@ -62,11 +62,46 @@ export function SiteLayout({ children, dark }: { children: ReactNode; dark?: boo
       <main className="flex-1">{children}</main>
 
       <footer className="border-t border-navy-line bg-navy-deep text-navy-foreground">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-6 text-sm text-navy-muted">
-          <p>كلية الحاسبات وتقنية المعلومات (اسم تجريبي)</p>
-          <p>البريد: <span className="ltr">contact@mirsad.sa</span></p>
+        <div className="mx-auto grid max-w-7xl gap-x-8 gap-y-6 px-6 py-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <Logo inverted />
+            <p className="mt-2 max-w-xs text-xs leading-relaxed text-navy-muted">
+              منصة لتحليل الصور الجغرافية وتقدير المناطق المتأثرة بالكوارث.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-xs font-bold text-primary">روابط سريعة</h3>
+            <ul className="mt-2 space-y-1.5 text-sm">
+              <li>
+                <Link to="/about" className="text-navy-muted transition-colors hover:text-primary">
+                  عن المشروع
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" className="text-navy-muted transition-colors hover:text-primary">
+                  تسجيل الدخول
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-xs font-bold text-primary">تواصل معنا</h3>
+            <p className="mt-2 text-sm">
+              <a href="mailto:info@mirsad.sa" className="ltr text-navy-muted transition-colors hover:text-primary">
+                info@mirsad.sa
+              </a>
+            </p>
+            <p className="mt-1.5 text-xs leading-relaxed text-navy-muted">
+              جامعة الباحة – كلية الحاسبات والمعلومات – قسم علوم الحاسبات
+            </p>
+          </div>
         </div>
-        <div className="border-t border-navy-line py-4 text-center text-xs text-navy-muted">جميع البيانات المعروضة بيانات تجريبية</div>
+        <div className="border-t border-navy-line">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-6 py-3 text-xs text-navy-muted">
+            <p>© ٢٠٢٦ مِرصاد. جميع الحقوق محفوظة.</p>
+            <p className="rounded-full border border-navy-line px-2.5 py-0.5">البيانات المعروضة تجريبية</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
