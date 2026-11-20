@@ -107,9 +107,11 @@ export async function renderMapSheet(incident: Incident, results: ExportResult[]
   const meta = images.find((image) => image.id === result.day.imageId);
   text(`${meta?.crs ?? "نظام إحداثيات غير محدد"} · تدريج محلي تجريبي (كم)`, 1164, 972, 18, muted);
   // Radar logo, matching the existing mark.
-  ctx.fillStyle = affected; ctx.fillRect(1508, 26, 56, 56);
+  ctx.fillStyle = color("primary"); ctx.beginPath(); ctx.roundRect(1508, 26, 56, 56, 12); ctx.fill();
   ctx.strokeStyle = paper; ctx.lineWidth = 2;
   for (const radius of [9, 18]) { ctx.beginPath(); ctx.arc(1536, 54, radius, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.fillStyle = paper; ctx.beginPath(); ctx.moveTo(1536, 54); ctx.arc(1536, 54, 18, -0.6, 0); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.arc(1546, 61, 2, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = paper; ctx.beginPath(); ctx.arc(1536, 54, 3, 0, Math.PI * 2); ctx.fill();
   text("مِرصاد", 1490, 60, 34, ink, 700);
   let sy = wrap(`${TYPE_LABELS[incident.type]} · ${incident.name}`, 1568, 122, 340, 27, ink, 700);

@@ -47,7 +47,7 @@ export function ExportImage({ incidentId, runId, imageId, size = "default" }: {
   const ready = valid && preview?.signature === signature && !error;
   return <>
     <Button size={size} variant="outline" onClick={() => {
-      setSelected(preferred?.key ?? ""); setCompare(false); setComparisonKeys(results.slice(-3).map((r) => r.key));
+      setSelected(preferred?.key ?? ""); setFormat("png"); setCompare(false); setComparisonKeys(results.slice(-3).map((r) => r.key));
       setPreview(null); setError(""); setDeliveryError(""); setOpen(true);
     }}><ImageDown /> تصدير كصورة</Button>
     <Dialog open={open} onOpenChange={setOpen}>
