@@ -35,7 +35,7 @@ function History() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b bg-muted/50"><tr>
-              {["رقم التحليل", "الحالة", "نوع الكارثة", "عدد الصور", "تاريخ التحليل", "النموذج والإصدار", "المساحة المتأثرة", "حالة المراجعة", ""].map((h) => <th key={h} className={th}>{h}</th>)}
+              {["رقم التحليل", "الحالة", "نوع الكارثة", "عدد الصور", "تاريخ التحليل", "تاريخ الكارثة", "المساحة المتأثرة", "حالة المراجعة", ""].map((h) => <th key={h} className={th}>{h}</th>)}
             </tr></thead>
             <tbody className="divide-y">
               {rows.map((r) => {
@@ -48,7 +48,7 @@ function History() {
                     <td className={td}>{inc && <TypeBadge type={inc.type} />}</td>
                     <td className={td}>{r.days.length}</td>
                     <td className={`${td} whitespace-nowrap`}>{formatDate(r.startedAt)}</td>
-                    <td className={`${td} text-xs`}>{r.model} <span className="ltr">{r.modelVersion}</span></td>
+                    <td className={`${td} whitespace-nowrap`}>{inc ? formatDate(inc.startDate) : "—"}</td>
                     <td className={`${td} whitespace-nowrap`}><span className="ltr font-mono">{formatKm2(d.affectedKm2)}</span> km² · <span className="ltr font-mono">{formatPct(d.affectedPct)}</span></td>
                     <td className={td}><RunStatusBadge status={r.status} /></td>
                     <td className={`${td} text-end`}><div className="inline-flex gap-1.5">
